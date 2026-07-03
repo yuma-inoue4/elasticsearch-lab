@@ -213,9 +213,10 @@ elasticsearch-lab/
 │
 ├── ansible/
 │   ├── ansible.cfg
-│   ├── site.yml
+│   ├── playbook/
+│   │   └── site.yaml
 │   ├── group_vars/
-│   │   └── all.yml
+│   │   └── all.yaml
 │   └── roles/
 │       ├── multipass_vm/
 │       ├── filebeat/
@@ -296,7 +297,7 @@ elasticsearch-lab/
 初期構成の完了条件は以下とする。
 
 - `docker compose up -d` で Elasticsearch が起動する
-- `ansible-playbook site.yml` で Multipass VM が 2 台作成される
+- `ansible-playbook playbook/site.yaml` で Multipass VM が 2 台作成される
 - Ansible が VM の IP を自動取得する
 - 手書き inventory なしで VM に SSH 接続できる
 - VM 2 台に Filebeat が導入される

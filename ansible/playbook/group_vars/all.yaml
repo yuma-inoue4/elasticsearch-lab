@@ -1,0 +1,10 @@
+---
+#--------------------------------
+# multipass
+#--------------------------------
+multipass_cmd: multipass.exe 
+
+multipass_vms:
+  - name: vm-target-01
+    memory: 1GB
+    cpus: 1
