@@ -5,6 +5,9 @@
 mp_cmd: multipass.exe 
 
 mp_vms:
-  - name: vm-target-01
+  - name: vm-worker-1
+    memory: 1GB
+    cpus: 1
+  - name: vm-worker-2
     memory: 1GB
     cpus: 1

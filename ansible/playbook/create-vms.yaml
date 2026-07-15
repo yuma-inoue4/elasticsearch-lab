@@ -1,0 +1,91 @@
+---
+#--------------------------------
+# Playbook の基本的な構造
+#--------------------------------
+# ---                          # playbook 開始を示す
+# - name: Play の説明          # Playbookの1区切り(配列)をPlayと呼ぶ
+#   hosts: localhost　　　　　　# 対象のホストを指定
+#   tasks:                     # 実際に行う処理を追記
+#     - name: タスク1           
+#       ansible.builtin.command: ...
+#     - name: タスク2
+#       ansible.builtin.debug: ...
+
+#--------------------------------
+# 補足
+#--------------------------------
+#   ansible.builtin.{モジュール名}
+#   -> Ansibleの標準モジュールを呼び出して使用する
+#      モジュール名は、ansible-doc コマンドで確認できる
+#       例) ansible-doc -l | grep {モジュール名}
+#       例) ansible-doc -s {モジュール名} ※ よく使う、ひな形を表示
+#
+#   register: 変数名
+#   -> タスクの実行結果を変数に格納する
+# 
+#   changed_when: false
+#   -> タスクによってサーバーの状態が変更されたか？を記録する変数
+#      確認・表示だけのタスクは、状態変更しないため、明示的に false を格納
+#
+#   gather_facts: false
+#   -> ホスト情報収集の有無(OS, CPUなど)を無効化
+
+#--------------------------------
+# Playbook
+#--------------------------------
+- name: create vm multipass
+  hosts: localhost
+  connection: local   # VMにSSHせず、ローカルで実行
+  gather_facts: false # ホスト情報収集の有無(OS, CPUなど)を無効化
+  tasks:
+
+  # 稼働中のVM情報を取得
+  - name: get active vm info 
+    ansible.builtin.command: "{{ mp_cmd }} list --format json"
+    register: mp_list_json
+    changed_when: false
+
+  # 稼働中のVM情報から、VM名のみを取得
+  - name: extract vm name from active vm info 
+    ansible.builtin.set_fact:
+      mp_existing_names: "{{ (mp_list_json.stdout | from_json).list | map(attribute='name') | list }}"
+    changed_when: false
+
+  # VMを作成
+  - name: create vm
+    ansible.builtin.command: >
+      {{ mp_cmd }} launch 
+      --name {{ item.name }} 
+      --memory {{ item.memory }} 
+      --cpus {{ item.cpus }}
+    when: item.name not in mp_existing_names 
+    loop: "{{ mp_vms }}"
+    register: mp_launch_result
+
+  # 稼働中のVM情報を更新
+  - name: refresh active vm info
+    ansible.builtin.command: "{{ mp_cmd }} list --format json"
+    register: mp_list_json
+    changed_when: false
+
+  # - name: debug refresh active vm info
+  #   ansible.builtin.debug:
+  #     var: mp_list_json
+
+  #稼働中のVM情報から、VMのIPアドレスおよびVM名を取得
+  - name: extract vm ip address and name from active vm info 
+    ansible.builtin.set_fact:
+      mp_existing_ips_and_names: "{{ (mp_list_json.stdout | from_json).list}}"
+    changed_when: false
+
+  - name: debug extract vm ip address and name from active vm info
+    ansible.builtin.debug:
+      var: mp_existing_ips_and_names
+  
+  # - name: add vm ip address
+  #   ansible.builtin.add_host:
+  #     name: "{{ item.name }}"
+  #     groups: "{{ target }}"
+  #     ansible_host: "{{ item.ipv4 }}"
+  #   loop: "{{ mp }}"
+  
