@@ -2,7 +2,7 @@
 #--------------------------------
 # multipass
 #--------------------------------
-mp_cmd: multipass.exe 
+mp_cmd: multipass.exe
 
 mp_vms:
   - name: vm-worker-1
@@ -11,3 +11,5 @@ mp_vms:
   - name: vm-worker-2
     memory: 1GB
     cpus: 1
+
+group_name: workers

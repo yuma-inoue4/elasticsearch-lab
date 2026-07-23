@@ -8,12 +8,14 @@ elasticsearch-lab 向け。WSL2 + Windows 版 Multipass の導入から、ログ
 
 ### 前提
 
-| 項目 | 内容 |
-|------|------|
-| ホスト OS | Windows ラップトップ |
-| Linux 環境 | WSL2（Ubuntu 22.04 推奨） |
+
+| 項目              | 内容                                  |
+| --------------- | ----------------------------------- |
+| ホスト OS          | Windows ラップトップ                      |
+| Linux 環境        | WSL2（Ubuntu 22.04 推奨）               |
 | Multipass の置き場所 | **Windows 側**（WSL2 内ではなくホストにインストール） |
-| バックエンド | Hyper-V（Windows 版 Multipass が利用） |
+| バックエンド          | Hyper-V（Windows 版 Multipass が利用）    |
+
 
 > **注意:** `apt install multipass` は使えない。Ubuntu の apt リポジトリに `multipass` パッケージはない。Linux ネイティブ向けは `snap install multipass` が公式手順だが、本 lab では **Windows 版 + WSL2 から呼び出す** 構成を採用する。
 
@@ -24,41 +26,36 @@ elasticsearch-lab 向け。WSL2 + Windows 版 Multipass の導入から、ログ
 Multipass（Windows 版）は Hyper-V を使う。
 
 1. **設定 → プライバシーとセキュリティ → Windows のセキュリティ → デバイスのセキュリティ → コアの分離**
-   - メモリの整合性が **オン** になっていること（Hyper-V と共存要件）
+  - メモリの整合性が **オン** になっていること（Hyper-V と共存要件）
 2. **Windows の機能の有効化または無効化**
-   - 「Hyper-V」にチェック（Pro / Enterprise 等で利用可能）
-   - 「Windows ハイパーバイザー プラットフォーム」にチェック
+  - 「Hyper-V」にチェック（Pro / Enterprise 等で利用可能）
+  - 「Windows ハイパーバイザー プラットフォーム」にチェック
 3. 必要なら PC を再起動
 
 BIOS/UEFI で仮想化支援（Intel VT-x / AMD-V）が有効であることも確認する。
 
 ---
 
+
+
 ### Step 2: Multipass を Windows にインストール
 
-1. 公式サイトから `.msi` を取得  
-   https://canonical.com/multipass/install
+1. 公式サイトから `.msi` を取得
+  [https://canonical.com/multipass/install](https://canonical.com/multipass/install)
 2. インストーラを **管理者権限** で実行
 3. インストール先（デフォルト）:
-
-   ```text
+  ```text
    C:\Program Files\Multipass\bin\multipass.exe
-   ```
-
+  ```
 4. **PowerShell** で確認:
-
-   ```powershell
+  ```powershell
    multipass version
-   ```
-
+  ```
    例:
 
-   ```text
-   multipass   1.16.3+win
-   multipassd  1.16.3+win
-   ```
-
 ---
+
+
 
 ### Step 3: WSL2 を用意する
 
@@ -85,6 +82,8 @@ uname -a              # microsoft-standard-WSL2 と出れば WSL2
 
 ---
 
+
+
 ### Step 4: WSL2 から Multipass を呼べるようにする
 
 WSL2 のターミナル（bash）でエイリアスを設定する。
@@ -96,10 +95,12 @@ echo 'alias mp="/mnt/c/Program\ Files/Multipass/bin/multipass.exe"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-| 呼び方 | 説明 |
-|--------|------|
-| `multipass` | 正式名 |
-| `mp` | 短い別名（このチートシートではどちらも同義） |
+
+| 呼び方         | 説明                     |
+| ----------- | ---------------------- |
+| `multipass` | 正式名                    |
+| `mp`        | 短い別名（このチートシートではどちらも同義） |
+
 
 動作確認:
 
@@ -112,6 +113,8 @@ mp version
 PowerShell から使う場合はエイリアス不要。`multipass` をそのまま実行する。
 
 ---
+
+
 
 ### Step 5: 初回 VM 起動と動作確認
 
@@ -155,6 +158,8 @@ mp list --format json
 
 ---
 
+
+
 ### Step 6: ライフサイクル操作の確認
 
 ```bash
@@ -166,6 +171,8 @@ mp list                    # State: Running（IP は多くの場合同じだが�
 ```
 
 ---
+
+
 
 ### 導入完了チェックリスト
 
@@ -182,6 +189,8 @@ mp list                    # State: Running（IP は多くの場合同じだが�
 
 ---
 
+
+
 ### 補足: WSL2 内に snap 版を入れる場合（非推奨）
 
 ```bash
@@ -195,6 +204,8 @@ WSL2 上の snap 版はネットワークや snapd 周りでつまずきやす�
 
 ---
 
+
+
 ### 補足: IP アドレスについて
 
 - VM の IPv4 は Multipass の仮想ネットワーク（DHCP）から割り当て
@@ -203,6 +214,8 @@ WSL2 上の snap 版はネットワークや snapd 周りでつまずきやす�
 - 手書き inventory に IP を直書きしない。Ansible では `mp list --format json` で都度取得する
 
 ---
+
+
 
 ## VM の作成・起動
 
@@ -219,6 +232,8 @@ mp launch 24.04 --name test-vm --memory 1G --cpus 1
 # ディスクサイズを指定（デフォルト 5GB）
 mp launch --name test-vm --disk 10G
 ```
+
+
 
 ## 状態確認
 
@@ -239,6 +254,8 @@ mp version
 mp find
 ```
 
+
+
 ## VM への接続
 
 ```bash
@@ -251,6 +268,8 @@ mp exec vm-source-01 -- ip -4 addr show
 mp exec vm-source-01 -- cat /etc/os-release
 ```
 
+
+
 ## 停止・再起動
 
 ```bash
@@ -259,18 +278,44 @@ mp start vm-source-01
 mp restart vm-source-01
 ```
 
+
+
 ## 削除
 
 ```bash
-# 削除マーク（まだ残る）
+# 削除マーク（一覧には残る。State: Deleted）
 mp delete vm-source-01
 
-# 完全削除（delete 後に実行）
+# 完全削除（delete 後に実行。Deleted 状態の VM だけ消える）
 mp purge
 
 # 停止してから削除
 mp stop vm-source-01 && mp delete vm-source-01 && mp purge
+
+# 一発で完全削除（推奨）
+mp stop --force vm-source-01
+mp delete --purge vm-source-01
 ```
+
+> **注意:** `mp purge` だけでは **Running / Stopped の VM は消えない**。先に `mp delete`（または `mp delete --purge`）が必要。
+
+
+
+### 壊れた VM（IPv4 が N/A、`mp launch` 中断後など）
+
+起動は `Running` だが IP が `N/A` のまま、`mp info` が `ssh connection failed` / `test-vm.mshome.net` 解決失敗になる VM は **作成が中途半端に終わった状態**。
+
+```bash
+# 1. 強制停止 → 完全削除
+mp stop --force test-vm
+mp delete --purge test-vm
+mp list    # No instances found. なら OK
+
+# 2. 10 秒以上返らなければ Ctrl+C → mp-fix（multipassd 詰まり）
+mp-fix
+```
+
+削除後、**ネットワークを直してから** 作り直す（下記「launch が固まる / IPv4 が N/A」参照）。
 
 ## ファイル共有（参考）
 
@@ -281,6 +326,8 @@ mp mount /path/on/host vm-source-01:/path/on/vm
 # マウント解除
 mp umount vm-source-01:/path/on/vm
 ```
+
+
 
 ## よく使う確認コマンド（VM 内）
 
@@ -293,6 +340,8 @@ ping -c 3 8.8.8.8          # 外向き通信確認
 systemctl status ssh         # SSH サービス確認
 ```
 
+
+
 ## elasticsearch-lab 用クイックスタート
 
 ```bash
@@ -302,6 +351,8 @@ mp list
 mp shell vm-source-01
 ```
 
+
+
 ## トラブルシュート
 
 ```bash
@@ -309,12 +360,13 @@ mp shell vm-source-01
 mp launch -vvv --name debug-vm
 ```
 
-| 症状 | 確認すること |
-|------|-------------|
+
+| 症状                                    | 確認すること                                |
+| ------------------------------------- | ------------------------------------- |
 | WSL2 で `multipass: command not found` | `~/.bashrc` のエイリアス、`source ~/.bashrc` |
-| `multipass.exe` が見つからない | Windows 側にインストール済みか、パスが正しいか |
-| `apt install multipass` が失敗する | apt にパッケージはない。Windows 版を使う |
-| VM が起動しない | Hyper-V 有効か、メモリ不足でないか |
-| VM からネットに出られない | `mp exec <name> -- ping -c 3 8.8.8.8` |
-| IP がわからない | `mp list` または `mp info <name>` |
-| IP が変わった | 正常。`mp list --format json` で再取得 |
+| `multipass.exe` が見つからない               | Windows 側にインストール済みか、パスが正しいか           |
+| `apt install multipass` が失敗する         | apt にパッケージはない。Windows 版を使う            |
+| VM が起動しない                             | Hyper-V 有効か、メモリ不足でないか                 |
+| VM からネットに出られない                        | `mp exec <name> -- ping -c 3 8.8.8.8` |
+| IP がわからない                             | `mp list` または `mp info <name>`        |
+| IP が変わった                              | 正常。`mp list --format json` で再取得       |
