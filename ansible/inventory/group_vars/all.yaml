@@ -2,14 +2,30 @@
 #--------------------------------
 # multipass
 #--------------------------------
+# WSL上でMultipassを呼び出すコマンド
 mp_cmd: multipass.exe
 
+# 作成するVMスペックのリスト
 mp_vms:
-  - name: vm-worker-1
-    memory: 1GB
+  - name: vm-target-01
+    memory: 1G
     cpus: 1
-  - name: vm-worker-2
-    memory: 1GB
+  - name: vm-target-02
+    memory: 1G
     cpus: 1
 
-group_name: workers
+# 作成したVMのグループ名
+vm_group: "target"
+
+#--------------------------------
+# SSH
+#--------------------------------
+# 多分不要、SSHできて不具合なければ削除する
+# ansible_user: ubuntu
+# ansible_ssh_private_key_file: /mnt/c/ProgramData/Multipass/data/ssh-keys/id_rsa
+# ansible_ssh_common_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+ansible_user: ubuntu
+ansible_ssh_private_key_file: /mnt/c/Users/y.inoue/.ssh/elastic_ed25519
+ansible_ssh_executable: /mnt/c/Windows/System32/OpenSSH/ssh.exe
+ansible_ssh_common_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"

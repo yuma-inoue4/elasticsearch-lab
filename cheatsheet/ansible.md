@@ -756,7 +756,9 @@ Multipass の JSON から既存 VM 名リストを作る式:
 | `multipass_cmd` / `mp_cmd` 未定義 | `group_vars` の置き場所（`inventory/group_vars/` か） |
 | `conflicting action statements` | `set_fact` のパラメータのインデント（モジュール名より深く） |
 | `from_json` を `command` に渡した | データの確認は `debug` / `set_fact` を使う |
-| SSH ping が失敗                    | SSH 鍵パス `/mnt/c/ProgramData/Multipass/data/ssh-keys/id_rsa` |
+| SSH ping が失敗 / WSL から届かない | WSL→Multipass IP は不通なことが多い。Windows `ssh.exe` + `ansible_ssh_executable` を使う。詳細は `ansible/playbook/memo.md`「SSH / 鍵まわり」 |
+| ProgramData の Multipass `id_rsa` が読めない | 一般ユーザー不可。自前 ed25519 + `mp exec` で公開鍵配布 |
+| Windows で `Load key ... Permission denied` | `icacls` で秘密鍵の ACL を自分だけ `(R)` に |
 | VM が既にある                        | playbook は launch をスキップ（既存なら start のみ）                      |
 | IP が変わった                        | 正常。playbook 実行のたびに JSON から再取得                               |
 

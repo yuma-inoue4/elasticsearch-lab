@@ -1,76 +1,106 @@
 ---
 #--------------------------------
-# Playbook の基本的な構造
+# VM 作成 playbook（Step 5）
 #--------------------------------
-# ---                          # playbook 開始を示す
-# - name: Play の説明          # Playbookの1区切り(配列)をPlayと呼ぶ
-#   hosts: localhost　　　　　　# 対象のホストを指定
-#   tasks:                     # 実際に行う処理を追記
-#     - name: タスク1           
-#       ansible.builtin.command: ...
-#     - name: タスク2
-#       ansible.builtin.debug: ...
+# 実行:
+#   cd ~/repo/elasticsearch-lab/ansible
+#   ansible-playbook playbook/create-vms.yaml
+#
+# 方針:
+#   - 1 ファイル・Play 1 つで完結（include_tasks なし）
+#   - 既存 VM はスキップ（冪等）
+#   - launch は loop で 1 台ずつ（Ansible は前の完了を待ってから次へ）
+#   - 各 launch 後に sleep（Windows Multipass の連続起動対策）
+#   - 最後に list を取り直して debug 表示
+#--------------------------------
 
 #--------------------------------
-# 補足
+# Play1. Multipass VMセットアップ
 #--------------------------------
-#   ansible.builtin.{モジュール名}
-#   -> Ansibleの標準モジュールを呼び出して使用する
-#      モジュール名は、ansible-doc コマンドで確認できる
-#       例) ansible-doc -l | grep {モジュール名}
-#       例) ansible-doc -s {モジュール名} ※ ひな形を表示
-#
-#   register: 変数名
-#   -> タスクの実行結果を変数に格納する
-# 
-#   changed_when: false
-#   -> タスクによってサーバーの状態が変更されたか？を記録する変数
-#      確認・表示だけのタスクは、状態変更しないため、明示的に false を格納
-#
-#   gather_facts: false
-#   -> ホスト情報収集の有無(OS, CPUなど)を無効化
-# 
-#   connection: local
-#   -> VMにSSHせず、ローカルで実行
-
-#--------------------------------
-# Playbook
-#--------------------------------
-- name: VMの作成
+- name: Multipass VM を作成する
   hosts: localhost
   connection: local
   gather_facts: false
   tasks:
-    - name: 01-現在のVM情報を取得 
+
+    #--------------------------------
+    # 1. 現状の VM 一覧を取得
+    #--------------------------------
+    - name: 稼働中の VM 一覧を JSON で取得
       ansible.builtin.command: "{{ mp_cmd }} list --format json"
       register: mp_list_json
       changed_when: false
 
-    - name: 02-現在のVM情報を更新
-      ansible.builtin.command: "{{ mp_cmd }} list --format json"
-      register: mp_list_json
-      changed_when: false
-
-    - name: 03-現在のVM名とIPを取得 
+    - name: 稼働中の VM 名一覧を作成
       ansible.builtin.set_fact:
-        mp_existing_ips_and_names: "{{ (mp_list_json.stdout | from_json).list}}"
+        mp_existing_names: "{{ (mp_list_json.stdout | from_json).list | map(attribute='name') | list }}"
+
+    - name: 作成対象を絞り込む（未作成だけ）
+      ansible.builtin.set_fact:
+        mp_vms_to_create: "{{ mp_vms | rejectattr('name', 'in', mp_existing_names) | list }}"
+
+    - name: 作成前の状態を表示
+      ansible.builtin.debug:
+        msg:
+          - "稼働中のVM   : {{ mp_existing_names }}"
+          - "作成予定のVM : {{ mp_vms_to_create | map(attribute='name') | list }}"
+
+    #--------------------------------
+    # 2. 未作成の VM を作成
+    #--------------------------------
+    - name: VM を 1 台ずつ作成
+      ansible.builtin.shell: |
+        {{ mp_cmd }} launch \
+        --name {{ item.name }} \
+        --memory {{ item.memory }} \
+        --cpus {{ item.cpus }} \
+        && sleep 5
+      args:
+        executable: /bin/bash # Bashを使用する事を明示
+      loop: "{{ mp_vms_to_create }}"
+      when: mp_vms_to_create | length > 0
+
+    #--------------------------------
+    # 3. 作成結果を取り直して debug
+    #--------------------------------
+    - name: 作成後の VM 一覧を JSON で再取得
+      ansible.builtin.command: "{{ mp_cmd }} list --format json"
+      register: mp_list_after_json
       changed_when: false
 
-    - name: 04-VMのIPを追加
-      ansible.builtin.add_host:
-        name: "{{ item.name }}"
-        groups: "{{ group_name }}"
-        ansible_host: "{{ item.ipv4[0] }}"
-      when: item.name not in mp_existing_ips_and_names
-      loop: "{{ mp_existing_ips_and_names }}"
-      register: add_host_result
+    - name: VMの作成結果を表示
+      ansible.builtin.debug:
+        msg: "{{ (mp_list_after_json.stdout | from_json).list }}"
 
 #--------------------------------
-# Playbook
+# Play2.VMのIPアドレスの取得
 #--------------------------------
-- name: 追加した VM を確認
-  hosts: workers
+- name: Multipass VM にログインしてセットアップを行う
+  hosts: localhost
+  connection: local
   gather_facts: false
   tasks:
-  - ansible.builtin.debug:
-      msg: "{{ inventory_hostname }} → {{ ansible_host }}"
+
+    - name: VMのIPアドレスを取得
+      ansible.builtin.add_host:
+        name: "{{ item.name }}"
+        ansible_host: "{{ item.ipv4[0] }}"
+        group: "{{ vm_group }}"
+      loop: "{{ (mp_list_after_json.stdout | from_json).list }}"
+      when: mp_list_after_json | length > 0
+      register: ansible_hosts
+
+    - name: VMのIPアドレスの取得結果を表示
+      ansible.builtin.debug:
+        msg: "{{ ansible_hosts.results | map(attribute='add_host.host_vars.ansible_host') | list }}"
+
+#--------------------------------
+# Play3.SSHセットアップ
+#--------------------------------
+- name: SSHセットアップ
+  hosts: "{{ vm_group }}"
+  connection: ssh
+  gather_facts: false
+  tasks:
+    - name: SSHセットアップ
+    
