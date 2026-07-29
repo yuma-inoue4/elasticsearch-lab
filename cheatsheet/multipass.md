@@ -95,11 +95,24 @@ echo 'alias mp="/mnt/c/Program\ Files/Multipass/bin/multipass.exe"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
+`multipassd` が詰まったとき用に `mp-fix` も `~/.bashrc` に定義しておく（詳細は下記「mp-fix」参照）。
+
+```bash
+# multipassd 詰まり時: UAC 承認後に Windows 側で強制再起動
+mp-fix() {
+  powershell.exe -NoProfile -Command "Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','C:\Users\Public\fix-multipass-windows.ps1'"
+  echo "UAC を承認してください。完了後: cat /mnt/c/Users/Public/multipass-fix-result.txt"
+}
+```
+
+Windows 側の修復スクリプト `C:\Users\Public\fix-multipass-windows.ps1` を用意しておく（初回セットアップ時に配置）。
+
 
 | 呼び方         | 説明                     |
 | ----------- | ---------------------- |
 | `multipass` | 正式名                    |
 | `mp`        | 短い別名（このチートシートではどちらも同義） |
+| `mp-fix`    | multipassd 詰まり時の修復コマンド |
 
 
 動作確認:
@@ -315,7 +328,7 @@ mp list    # No instances found. なら OK
 mp-fix
 ```
 
-削除後、**ネットワークを直してから** 作り直す（下記「launch が固まる / IPv4 が N/A」参照）。
+削除後、**`mp-fix` でネットワークを直してから** 作り直す（詳細は下記「mp-fix」参照）。
 
 ## ファイル共有（参考）
 
@@ -361,8 +374,61 @@ mp launch -vvv --name debug-vm
 ```
 
 
+
+### mp-fix（multipassd 詰まり時）
+
+WSL2 から `mp version` や `mp list` が **10 秒以上返らない**（ハングする）とき、Windows 側の `multipassd` が応答不能になっている可能性が高い。サービスは `Running` でも CLI が固まることがある。
+
+**症状の例:**
+
+- `mp version` / `mp list` が無限に待つ（数分待っても返らない）
+- `mp launch` を Ctrl+C で中断したあと、以降すべての `mp` コマンドが遅くなる・固まる
+- IPv4 が `N/A` の VM が残っている
+
+**修復手順:**
+
+```bash
+mp-fix
+# UAC ダイアログが出たら「はい」をクリック
+
+# 完了確認（SUCCESS と出れば OK）
+cat /mnt/c/Users/Public/multipass-fix-result.txt
+
+mp version   # 数秒以内に返れば復旧
+mp list
+```
+
+`mp-fix` が行うこと（`fix-multipass-windows.ps1`）:
+
+1. `multipass.exe` / `multipassd.exe` プロセスを強制終了
+2. Multipass Windows サービスを停止 → 再起動
+3. `C:\ProgramData\Multipass\cache\network-cache` を削除
+4. `multipass version` / `multipass list` で動作確認し、結果をログに書き出す
+
+**修復後の追加作業（IPv4 が N/A の VM がある場合）:**
+
+```bash
+mp stop --force <name>
+mp delete --purge <name>
+mp list    # 問題の VM が消えていることを確認してから作り直す
+```
+
+**再発を減らすコツ:**
+
+- `mp launch` 実行中は Ctrl+C で中断しない（Ansible playbook 実行中も同様）
+- 連続 `launch` のあとは playbook 同様 `sleep 5` 程度空ける
+- 頻発する場合は Windows の「高速スタートアップ」を無効化する
+
+**それでも直らない場合:**
+
+- Windows を再起動
+- PowerShell（管理者）から `fix-multipass-windows.ps1` を直接実行
+- WSL interop 問題の疑いがある場合: `sudo bash scripts/fix-wsl-multipass-interop.sh` のあと `wsl --shutdown`（PowerShell 側）→ WSL を開き直す
+
+
 | 症状                                    | 確認すること                                |
 | ------------------------------------- | ------------------------------------- |
+| `mp` コマンドが 10 秒以上返らない / ハングする      | `mp-fix` → ログで `=== SUCCESS ===` を確認 |
 | WSL2 で `multipass: command not found` | `~/.bashrc` のエイリアス、`source ~/.bashrc` |
 | `multipass.exe` が見つからない               | Windows 側にインストール済みか、パスが正しいか           |
 | `apt install multipass` が失敗する         | apt にパッケージはない。Windows 版を使う            |
@@ -370,3 +436,4 @@ mp launch -vvv --name debug-vm
 | VM からネットに出られない                        | `mp exec <name> -- ping -c 3 8.8.8.8` |
 | IP がわからない                             | `mp list` または `mp info <name>`        |
 | IP が変わった                              | 正常。`mp list --format json` で再取得       |
+| IPv4 が N/A のまま                        | VM を `--purge` 削除 → `mp-fix` → 作り直し |

@@ -85,22 +85,64 @@
       ansible.builtin.add_host:
         name: "{{ item.name }}"
         ansible_host: "{{ item.ipv4[0] }}"
-        group: "{{ vm_group }}"
+        groups: target
       loop: "{{ (mp_list_after_json.stdout | from_json).list }}"
-      when: mp_list_after_json | length > 0
+      when: (mp_list_after_json.stdout | from_json).list | length > 0
       register: ansible_hosts
 
     - name: VMのIPアドレスの取得結果を表示
       ansible.builtin.debug:
         msg: "{{ ansible_hosts.results | map(attribute='add_host.host_vars.ansible_host') | list }}"
 
+    #--------------------------------
+    # SSH 鍵（SSH 前に mp exec で公開鍵を配布する）
+    #--------------------------------
+    - name: SSH 用 .ssh ディレクトリを用意
+      ansible.builtin.file:
+        path: "{{ ansible_ssh_private_key_file_wsl | dirname }}"
+        state: directory
+        mode: "0700"
+
+    - name: SSH 鍵ペアを作成（未作成の場合）
+      ansible.builtin.command:
+        cmd: ssh-keygen -t ed25519 -f {{ ansible_ssh_private_key_file_wsl }} -N ""
+        creates: "{{ ansible_ssh_private_key_file_wsl }}"
+
+    - name: Windows 秘密鍵の ACL を修正（ssh.exe が読めるようにする）
+      ansible.builtin.shell: |
+        cmd.exe /c "icacls {{ ansible_ssh_private_key_file_wsl | replace('/mnt/c/', 'C:\\\\') | replace('/', '\\\\') }} /inheritance:r"
+        cmd.exe /c "icacls {{ ansible_ssh_private_key_file_wsl | replace('/mnt/c/', 'C:\\\\') | replace('/', '\\\\') }} /grant:r {{ ansible_windows_user }}:(R)"
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+    - name: 公開鍵の内容を読み込む
+      ansible.builtin.set_fact:
+        ssh_public_key: "{{ lookup('file', ansible_ssh_public_key_file) }}"
+
+    - name: 公開鍵を VM に配布（未登録の場合のみ追加）
+      ansible.builtin.shell: |
+        {{ mp_cmd }} exec {{ item.name }} -- bash -lc "mkdir -p ~/.ssh && chmod 700 ~/.ssh && if ! grep -qxF '{{ ssh_public_key }}' ~/.ssh/authorized_keys 2>/dev/null; then echo '{{ ssh_public_key }}' >> ~/.ssh/authorized_keys; echo ADDED; else echo EXISTS; fi; chmod 600 ~/.ssh/authorized_keys"
+      loop: "{{ (mp_list_after_json.stdout | from_json).list }}"
+      when: (mp_list_after_json.stdout | from_json).list | length > 0
+      register: key_deploy
+      changed_when: key_deploy.stdout is search('ADDED')
+
 #--------------------------------
 # Play3.SSHセットアップ
 #--------------------------------
 - name: SSHセットアップ
-  hosts: "{{ vm_group }}"
+  hosts: target
   connection: ssh
   gather_facts: false
   tasks:
-    - name: SSHセットアップ
-    
+
+    - name: SSH 疎通確認（raw … VM の Python 3.14 は Ansible 2.10 の ping と非互換）
+      ansible.builtin.raw: echo pong
+      register: ssh_check
+      changed_when: false
+
+    - name: 接続先を表示
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} → {{ ansible_host }} : {{ ssh_check.stdout | trim }}"
+
