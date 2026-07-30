@@ -23,13 +23,15 @@ vm_groups: "target"
 ansible_user: ubuntu
 
 # ssh.exe 用（バックスラッシュは Ansible が食うので / 区切り）
-ansible_ssh_private_key_file: C:/Users/User/.ssh/elastic_ed25519
+ansible_ssh_private_key_file: C:/Users/y.inoue/.ssh/elastic_ed25519
+
 
 # lookup('file') 用（WSL から読む）
-ansible_ssh_public_key_file: /mnt/c/Users/User/.ssh/elastic_ed25519.pub
-ansible_ssh_private_key_file_wsl: /mnt/c/Users/User/.ssh/elastic_ed25519
-ansible_windows_user: User
 ansible_ssh_executable: /mnt/c/Windows/System32/OpenSSH/ssh.exe
+ansible_ssh_public_key_file: /mnt/c/Users/y.inoue/.ssh/elastic_ed25519.pub
+ansible_ssh_private_key_file_wsl: /mnt/c/Users/y.inoue/.ssh/elastic_ed25519
+ansible_windows_user: y.inoue
+
 
 # ControlMaster=no … WSL から Windows ssh.exe 利用時の getsockname エラー回避
 ansible_ssh_common_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ControlMaster=no"
