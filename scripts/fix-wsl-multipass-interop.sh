@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# WSL2 + systemd=true 環境で Windows .exe（multipass 等）を動かすための interop 修正
+# WSL2 から multipass.exe 等の Windows 実行ファイルが動かないときに、
+# WSL↔Windows 連携（binfmt / WSLInterop）を修復するスクリプト。
+# Mac では不要。問題が起きた Windows + WSL2（systemd=true）でのみ使う。
 set -euo pipefail
 
 if [[ "${EUID}" -ne 0 ]]; then
@@ -7,6 +9,8 @@ if [[ "${EUID}" -ne 0 ]]; then
   exit 1
 fi
 
+# .exe を見つけたら /init 経由で Windows 側に渡して実行する、というルールを登録
+# WSL2(Ubuntu)では実行できないため
 install -d /usr/lib/binfmt.d
 echo ':WSLInterop:M::MZ::/init:PF' > /usr/lib/binfmt.d/WSLInterop.conf
 chmod 644 /usr/lib/binfmt.d/WSLInterop.conf

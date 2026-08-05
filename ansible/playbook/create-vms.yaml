@@ -1,14 +1,8 @@
 ---
 #--------------------------------
-# VM 作成 playbook（Step 5）
+# Multipass VM を作成
 #--------------------------------
-# 実行:
-#   cd ~/repo/elasticsearch-lab/ansible
-#   ansible-playbook playbook/create-vms.yaml
-#
 # 方針:
-#   - 1 ファイル・Play 1 つで完結（include_tasks なし）
-#   - 既存 VM はスキップ（冪等）
 #   - launch は loop で 1 台ずつ（Ansible は前の完了を待ってから次へ）
 #   - 各 launch 後に sleep（Windows Multipass の連続起動対策）
 #   - 最後に list を取り直して debug 表示
@@ -17,14 +11,43 @@
 #--------------------------------
 # Play1. Multipass VMセットアップ
 #--------------------------------
-- name: Multipass VM を作成する
+- name: Multipass VM を作成
   hosts: localhost
   connection: local
   gather_facts: false
   tasks:
 
     #--------------------------------
-    # 1. 現状の VM 一覧を取得
+    # 1. 実行環境の取得と OS 別変数の選択
+    #--------------------------------
+    - name: Ansibleの実行環境を取得
+      ansible.builtin.setup:
+        gather_subset: [min]
+
+    - name: OS別変数を選択
+      ansible.builtin.set_fact:
+        mp_cmd: "{{ mp_cmd_win if ansible_facts['system'] == 'Linux' else mp_cmd_mac }}"
+        
+        # 制御ノード上のファイル操作用パス（keygen / dirname / chmod）
+        ssh_key_path: "{{ ssh_private_key_win_fs if ansible_facts['system'] == 'Linux' else ssh_private_key_mac }}"
+        ssh_pubkey_path: "{{ ssh_public_key_win_fs if ansible_facts['system'] == 'Linux' else ssh_public_key_mac }}"
+        
+        # VM への SSH 接続用（次プレイ以降のホスト変数としても利用）
+        ansible_ssh_private_key_file: "{{ ssh_private_key_win if ansible_facts['system'] == 'Linux' else ssh_private_key_mac }}"
+        ansible_ssh_executable: "{{ ssh_executable_win if ansible_facts['system'] == 'Linux' else ssh_executable_mac }}"
+
+    - name: 選択した OS 別変数を表示
+      ansible.builtin.debug:
+        msg:
+          - "system              : {{ ansible_facts['system'] }}"
+          - "mp_cmd              : {{ mp_cmd }}"
+          - "ssh_key_path        : {{ ssh_key_path }}"
+          - "ssh_pubkey_path     : {{ ssh_pubkey_path }}"
+          - "ansible_ssh_private_key_file : {{ ansible_ssh_private_key_file }}"
+          - "ansible_ssh_executable       : {{ ansible_ssh_executable }}"
+
+    #--------------------------------
+    # 2. 現状の VM 一覧を取得
     #--------------------------------
     - name: 稼働中の VM 一覧を JSON で取得
       ansible.builtin.command: "{{ mp_cmd }} list --format json"
@@ -46,7 +69,7 @@
           - "作成予定のVM : {{ mp_vms_to_create | map(attribute='name') | list }}"
 
     #--------------------------------
-    # 2. 未作成の VM を作成
+    # 3. 未作成の VM を作成
     #--------------------------------
     - name: VM を 1 台ずつ作成
       ansible.builtin.shell: |
@@ -54,26 +77,32 @@
         --name {{ item.name }} \
         --memory {{ item.memory }} \
         --cpus {{ item.cpus }} \
+        --disk {{ item.disk }} \
+        --group {{ item.groups }} \
         && sleep 5
       args:
-        executable: /bin/bash # Bashを使用する事を明示
+        executable: /bin/bash
       loop: "{{ mp_vms_to_create }}"
       when: mp_vms_to_create | length > 0
 
     #--------------------------------
-    # 3. 作成結果を取り直して debug
+    # 4. 作成結果を取り直して debug
     #--------------------------------
     - name: 作成後の VM 一覧を JSON で再取得
       ansible.builtin.command: "{{ mp_cmd }} list --format json"
       register: mp_list_after_json
       changed_when: false
 
+    - name: VM一覧を後続プレイ用に保存
+      ansible.builtin.set_fact:
+        mp_vm_list: "{{ (mp_list_after_json.stdout | from_json).list }}"
+
     - name: VMの作成結果を表示
       ansible.builtin.debug:
-        msg: "{{ (mp_list_after_json.stdout | from_json).list }}"
+        msg: "{{ mp_vm_list }}"
 
 #--------------------------------
-# Play2.VMのIPアドレスの取得
+# Play2.VMのIPアドレスの取得 / SSH鍵配布
 #--------------------------------
 - name: Multipass VM にログインしてセットアップを行う
   hosts: localhost
@@ -85,46 +114,60 @@
       ansible.builtin.add_host:
         name: "{{ item.name }}"
         ansible_host: "{{ item.ipv4[0] }}"
-        groups: target
-      loop: "{{ (mp_list_after_json.stdout | from_json).list }}"
-      when: (mp_list_after_json.stdout | from_json).list | length > 0
+        groups: "{{ vm_groups }}"
+        ansible_user: "{{ ansible_user }}"
+        ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"
+        ansible_ssh_executable: "{{ ansible_ssh_executable }}"
+        ansible_ssh_common_args: "{{ ansible_ssh_common_args }}"
+      loop: "{{ mp_vm_list }}"
+      when: mp_vm_list | length > 0
       register: ansible_hosts
 
     - name: VMのIPアドレスの取得結果を表示
       ansible.builtin.debug:
         msg: "{{ ansible_hosts.results | map(attribute='add_host.host_vars.ansible_host') | list }}"
+      when: mp_vm_list | length > 0
 
     #--------------------------------
     # SSH 鍵（SSH 前に mp exec で公開鍵を配布する）
     #--------------------------------
     - name: SSH 用 .ssh ディレクトリを用意
       ansible.builtin.file:
-        path: "{{ ansible_ssh_private_key_file_wsl | dirname }}"
+        path: "{{ ssh_key_path | dirname }}"
         state: directory
         mode: "0700"
 
     - name: SSH 鍵ペアを作成（未作成の場合）
       ansible.builtin.command:
-        cmd: ssh-keygen -t ed25519 -f {{ ansible_ssh_private_key_file_wsl }} -N ""
-        creates: "{{ ansible_ssh_private_key_file_wsl }}"
+        cmd: ssh-keygen -t ed25519 -f {{ ssh_key_path }} -N ""
+        creates: "{{ ssh_key_path }}"
 
+    # Windows / WSL のみ
     - name: Windows 秘密鍵の ACL を修正（ssh.exe が読めるようにする）
       ansible.builtin.shell: |
-        cmd.exe /c "icacls {{ ansible_ssh_private_key_file_wsl | replace('/mnt/c/', 'C:\\\\') | replace('/', '\\\\') }} /inheritance:r"
-        cmd.exe /c "icacls {{ ansible_ssh_private_key_file_wsl | replace('/mnt/c/', 'C:\\\\') | replace('/', '\\\\') }} /grant:r {{ ansible_windows_user }}:(R)"
+        cmd.exe /c "icacls {{ ssh_key_path | replace('/mnt/c/', 'C:\\\\') | replace('/', '\\\\') }} /inheritance:r"
+        cmd.exe /c "icacls {{ ssh_key_path | replace('/mnt/c/', 'C:\\\\') | replace('/', '\\\\') }} /grant:r {{ ansible_windows_user }}:(R)"
       args:
         executable: /bin/bash
       changed_when: false
+      when: ansible_facts['system'] == 'Linux'
+
+    # Mac のみ
+    - name: Mac 秘密鍵の権限を設定
+      ansible.builtin.file:
+        path: "{{ ssh_key_path }}"
+        mode: "0600"
+      when: ansible_facts['system'] == 'Darwin'
 
     - name: 公開鍵の内容を読み込む
       ansible.builtin.set_fact:
-        ssh_public_key: "{{ lookup('file', ansible_ssh_public_key_file) }}"
+        ssh_public_key: "{{ lookup('file', ssh_pubkey_path) }}"
 
     - name: 公開鍵を VM に配布（未登録の場合のみ追加）
       ansible.builtin.shell: |
         {{ mp_cmd }} exec {{ item.name }} -- bash -lc "mkdir -p ~/.ssh && chmod 700 ~/.ssh && if ! grep -qxF '{{ ssh_public_key }}' ~/.ssh/authorized_keys 2>/dev/null; then echo '{{ ssh_public_key }}' >> ~/.ssh/authorized_keys; echo ADDED; else echo EXISTS; fi; chmod 600 ~/.ssh/authorized_keys"
-      loop: "{{ (mp_list_after_json.stdout | from_json).list }}"
-      when: (mp_list_after_json.stdout | from_json).list | length > 0
+      loop: "{{ mp_vm_list }}"
+      when: mp_vm_list | length > 0
       register: key_deploy
       changed_when: key_deploy.stdout is search('ADDED')
 
@@ -145,4 +188,3 @@
     - name: 接続先を表示
       ansible.builtin.debug:
         msg: "{{ inventory_hostname }} → {{ ansible_host }} : {{ ssh_check.stdout | trim }}"
-

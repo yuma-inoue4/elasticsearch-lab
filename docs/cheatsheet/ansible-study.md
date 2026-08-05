@@ -7,14 +7,6 @@ elasticsearch-lab 向け。Ansible インストール後、小さく動くもの
 
 ---
 
-## 方針
-
-- いきなり `playbook/site.yaml` を全部書かない
-- **1 ステップずつ `ansible-playbook` を実行して成功を確認**する
-- VM の IP は手書き inventory に書かない（`add_host` で動的登録）
-- 最初は VM **1 台**、SSH / ping は後半に回す
-- playbook ファイルは **`ansible/playbook/` 配下**に格納する（ディレクトリ単位で管理）
-
 ### playbook の実行コマンド
 
 `ansible.cfg` は inventory の場所だけ指定し、playbook のパスは指定しない。  
@@ -73,6 +65,8 @@ retry_files_enabled = False
 
 ---
 
+
+
 ## Step 2: `inventory/localhost.yaml`
 
 **最初の Play は localhost で動かす**（Multipass コマンドを WSL2 から叩くため）。
@@ -84,16 +78,20 @@ ansible/
     └── localhost.yaml
 ```
 
+
+
 ### inventory とは
 
 **Ansible が「誰に対して作業するか」を把握するためのホスト一覧。**
 
 playbook の `hosts: localhost` と対になる。Ansible は実行前に inventory を読み、`localhost` という名前のホストが存在するか確認する。
 
-| ファイル | 役割 |
-|----------|------|
-| `ansible.cfg` | 全 playbook 共通の実行設定（inventory の**場所**を指定） |
-| `inventory/localhost.yaml` | ホスト一覧の**中身**（誰が操作対象か） |
+
+| ファイル                       | 役割                                       |
+| -------------------------- | ---------------------------------------- |
+| `ansible.cfg`              | 全 playbook 共通の実行設定（inventory の**場所**を指定） |
+| `inventory/localhost.yaml` | ホスト一覧の**中身**（誰が操作対象か）                    |
+
 
 `ansible.cfg` の `inventory = ./inventory` により、`inventory/` フォルダ内の YAML が読み込まれる。
 
@@ -119,15 +117,19 @@ all:
       ansible_connection: local
 ```
 
+
+
 ### 各行の意味
 
-| 行 | 意味 |
-|----|------|
-| `---` | YAML ファイルの開始（おまじない） |
-| `all:` | グループ名 `all`（全ホストの親グループ） |
-| `hosts:` | このグループに属するホスト一覧 |
-| `localhost:` | ホスト名。playbook の `hosts: localhost` と一致させる |
-| `ansible_connection: local` | SSH せず、**このマシン上で直接**コマンドを実行する |
+
+| 行                           | 意味                                        |
+| --------------------------- | ----------------------------------------- |
+| `---`                       | YAML ファイルの開始（おまじない）                       |
+| `all:`                      | グループ名 `all`（全ホストの親グループ）                   |
+| `hosts:`                    | このグループに属するホスト一覧                           |
+| `localhost:`                | ホスト名。playbook の `hosts: localhost` と一致させる |
+| `ansible_connection: local` | SSH せず、**このマシン上で直接**コマンドを実行する             |
+
 
 `ansible_connection: local` が重要。これがないと Ansible は `localhost` に SSH しようとして失敗することがある。WSL2 上で `multipass.exe` を叩く Play 1 では **local 接続**が正しい。
 
@@ -135,6 +137,8 @@ all:
 
 - **VM の IP**（`172.x.x.x`）… IP は変わるため `multipass list --format json` + `add_host` で都度登録
 - **Multipass VM 名**（`vm-source-01` など）… Step 6 まで inventory に書かない
+
+
 
 ### 確認
 
@@ -153,13 +157,17 @@ ansible localhost -m ping -c local
 
 ### よくあるミス
 
-| ミス | 結果 |
-|------|------|
+
+| ミス                               | 結果                                  |
+| -------------------------------- | ----------------------------------- |
 | ファイル名の typo（`localshot.yaml` など） | 動くこともあるが、意図とずれる。`localhost.yaml` 推奨 |
-| `ansble_connection`（スペルミス） | 設定が効かず SSH 接続を試みて失敗 |
-| VM の IP を直書き | IP 変更のたびに手修正が必要になる |
+| `ansble_connection`（スペルミス）       | 設定が効かず SSH 接続を試みて失敗                 |
+| VM の IP を直書き                     | IP 変更のたびに手修正が必要になる                  |
+
 
 ---
+
+
 
 ## Step 3: 最小 `playbook/site.yaml`（multipass list だけ）
 
@@ -200,10 +208,14 @@ ansible/
 ansible-playbook playbook/site.yaml
 ```
 
+
+
 ### 成功条件
 
 - エラーなく終了する
 - `multipass list` 相当の出力が表示される
+
+
 
 ### 注意
 
@@ -211,6 +223,8 @@ ansible-playbook playbook/site.yaml
 - `multipass.exe` を直接書く（後で変数化する）
 
 ---
+
+
 
 ## Step 4: `group_vars/all.yaml`
 
@@ -247,6 +261,8 @@ multipass_vms:
 
 ---
 
+
+
 ## Step 5: `multipass launch`（VM 1 台）
 
 **VM 作成の自動化。** まだ 1 台だけ。
@@ -255,6 +271,8 @@ multipass_vms:
 
 1. `{{ multipass_cmd }} list --format json` で現状取得
 2. 対象 VM が一覧に **なければ** `launch`
+
+
 
 ### 成功条件
 
@@ -270,6 +288,8 @@ multipass.exe list
 - 既存 VM 名と `multipass_vms` を比較して `when:` で launch を制御
 
 ---
+
+
 
 ## Step 6: `add_host` + 2 つ目の Play
 
@@ -288,6 +308,8 @@ multipass.exe list
     groups: source_vms
 ```
 
+
+
 ### Play 2（source_vms）— まだ ping しない
 
 ```yaml
@@ -301,9 +323,13 @@ multipass.exe list
         msg: "{{ inventory_hostname }} → {{ ansible_host }}"
 ```
 
+
+
 ### 成功条件
 
 - `vm-source-01 → 172.x.x.x` のような debug が出る
+
+
 
 ### add_host の役割（再確認）
 
@@ -316,6 +342,8 @@ multipass.exe list
 
 
 ---
+
+
 
 ## Step 7: SSH + `ping` モジュール
 
@@ -340,11 +368,15 @@ Play 2 に task を追加:
   ansible.builtin.ping:
 ```
 
+
+
 ### 成功条件
 
 - 各 VM で `pong` が返る
 
 ---
+
+
 
 ## Step 8: VM 2 台・冪等性
 
@@ -356,6 +388,8 @@ Play 2 に task を追加:
 2. 既存 VM は `launch` をスキップ
 3. 停止中（`Stopped`）なら `start` する
 
+
+
 ### 成功条件
 
 - 2 回連続 `ansible-playbook playbook/site.yaml` しても、2 回目は launch されない（冪等）
@@ -363,17 +397,21 @@ Play 2 に task を追加:
 
 ---
 
+
+
 ## 最初に作らなくていいもの
 
 
-| ファイル                | 作るタイミング        |
-| ------------------- | -------------- |
-| `roles/`            | Filebeat 導入の段階 |
-| VM 用の手書き inventory  | 使わない           |
+| ファイル                          | 作るタイミング        |
+| ----------------------------- | -------------- |
+| `roles/`                      | Filebeat 導入の段階 |
+| VM 用の手書き inventory            | 使わない           |
 | 複雑な `playbook/site.yaml` 一発書き | Step 3〜7 を経てから |
 
 
 ---
+
+
 
 ## 完成イメージ（ディレクトリ）
 
@@ -390,23 +428,27 @@ ansible/
 
 ---
 
+
+
 ## ステップ早見表
 
 
-| Step | 作るもの                      | ゴール                             |
-| ---- | ------------------------- | ------------------------------- |
-| 0    | —                         | Ansible インストール確認                |
-| 1    | `ansible.cfg`             | 実行環境の定義                         |
+| Step | 作るもの                       | ゴール                             |
+| ---- | -------------------------- | ------------------------------- |
+| 0    | —                          | Ansible インストール確認                |
+| 1    | `ansible.cfg`              | 実行環境の定義                         |
 | 2    | `inventory/localhost.yaml` | localhost のみ inventory に登録      |
 | 3    | 最小 `playbook/site.yaml`    | `multipass list` が Ansible から動く |
 | 4    | `group_vars/all.yaml`      | 変数の整理                           |
-| 5    | launch 1 台                | VM 作成の自動化                       |
-| 6    | `add_host`                | 動的 inventory                    |
-| 7    | `ping`                    | SSH 接続確認                        |
-| 8    | 2 台・冪等性                   | 仕様書どおりの初期構成                     |
+| 5    | launch 1 台                 | VM 作成の自動化                       |
+| 6    | `add_host`                 | 動的 inventory                    |
+| 7    | `ping`                     | SSH 接続確認                        |
+| 8    | 2 台・冪等性                    | 仕様書どおりの初期構成                     |
 
 
 ---
+
+
 
 ## 今日の目安
 
@@ -415,6 +457,8 @@ ansible/
 「Ansible が Multipass を叩ける」まで行ければ、Step 4 以降は同じパターンの積み上げ。
 
 ---
+
+
 
 ## トラブルシュート
 
