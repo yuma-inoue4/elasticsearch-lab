@@ -1,0 +1,28 @@
+# Elasticsearch 設定（vm-es-stack / 単一ノード検証用）
+
+# cluster.name : クラスタの名前（複数ノードをまとめるときの識別子）
+cluster.name: {{ elasticsearch_cluster_name }}
+
+# node.name : このノードの名前（inventory のホスト名 = vm-es-stack）
+node.name: {{ inventory_hostname }}
+
+# network.host : 0.0.0.0 … 外からも 9200 に繋げる（target VM からログを送れる）
+network.host: 0.0.0.0
+http.port: 9200
+
+# discovery.type : single-node … 1台だけのクラスタ（検証用）
+discovery.type: single-node
+
+# path.data : インデックスなどデータ本体の置き場
+path.data: /var/lib/elasticsearch
+
+# path.logs : ログの置き場
+path.logs: /var/log/elasticsearch
+
+{% if not elasticsearch_lab_security_enabled | bool %}
+# 検証用 : パスワード・TLS をオフ（Filebeat 直送を簡単にする。本番では true にすること）
+xpack.security.enabled: false
+xpack.security.enrollment.enabled: false
+xpack.security.http.ssl.enabled: false
+xpack.security.transport.ssl.enabled: false
+{% endif %}

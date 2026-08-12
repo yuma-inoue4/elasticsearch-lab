@@ -2,22 +2,24 @@
 #--------------------------------
 # multipass（共通）
 #--------------------------------
+# groups … Ansible inventory 用（multipass には渡さない）
+# disk … 省略時は playbook 側で 5G
 mp_vms:
   - name: vm-target-01
     memory: 1G
     cpus: 1
-    groups: "target"
+    disk: 5G
+    groups: target
   - name: vm-target-02
     memory: 1G
     cpus: 1
-    groups: "target"
+    disk: 5G
+    groups: target
   - name: vm-es-stack
     memory: 4G
     cpus: 2
     disk: 10G
-    groups: "es-stack"
-
-#vm_groups: "target"
+    groups: es-stack
 
 # OS 別コマンド（playbook で mp_cmd に選択）
 mp_cmd_win: multipass.exe
@@ -51,3 +53,31 @@ ansible_windows_user: y.inoue
 ssh_private_key_mac: "{{ lookup('env', 'HOME') }}/.ssh/elastic_ed25519"
 ssh_public_key_mac: "{{ lookup('env', 'HOME') }}/.ssh/elastic_ed25519.pub"
 ssh_executable_mac: ssh
+
+#--------------------------------
+# Elasticsearch / Kibana（es-stack）
+#--------------------------------
+# elastic_stack_major : apt リポジトリのメジャーバージョン（8.x）
+elastic_stack_major: "8"
+# elastic_version : インストールする ES / Kibana のバージョン
+elastic_version: "8.15.0"
+# elasticsearch_cluster_name : クラスタ名（elasticsearch.yml の cluster.name）
+elasticsearch_cluster_name: elasticsearch-lab
+# elasticsearch_heap_size : JVM が使うメモリ上限（4G VM 向けに 1g）
+elasticsearch_heap_size: "1g"
+
+# elasticsearch_lab_security_enabled : false … 検証用に認証・TLS オフ（本番・Fleet 利用時は true）
+elasticsearch_lab_security_enabled: false
+
+# kibana_enable : true … Kibana（5601）も同 VM に入れる
+kibana_enable: true
+# fleet_enable : false … Fleet（Agent の司令塔）は今は使わない（Filebeat 直送）
+fleet_enable: false
+# fleet_url / fleet_enrollment_token : Elastic Agent 登録用（Fleet 有効時に設定）
+fleet_url: ""
+fleet_enrollment_token: ""
+
+# elasticsearch_host / kibana_host : target の Filebeat が送り先として参照
+# setup-elasticsearch 実行後は inventory/generated/elasticsearch.yaml も更新される
+elasticsearch_host: "http://192.168.252.8:9200"
+kibana_host: "http://192.168.252.8:5601"

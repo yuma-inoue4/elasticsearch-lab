@@ -1,0 +1,35 @@
+---
+# Fleet Server セットアップ（任意・フェーズ3）
+#
+# Fleet : Elastic Agent の司令塔。Kibana から収集設定を配り、各 VM の Agent を一元管理する
+# 今回の lab では Filebeat 直送のため未使用（fleet_enable: false）
+#
+# 前提: elasticsearch_lab_security_enabled: true（Fleet にはセキュリティ必須）
+# 実行: ansible-playbook playbook/setup-fleet.yaml
+#
+# 手順概要:
+#   1. Kibana 初回セットアップ（enrollment token）
+#   2. Fleet Server ポリシー作成
+#   3. fleet_enrollment_token を group_vars に設定
+#   4. target 側 playbook で Elastic Agent を enroll
+
+- name: Fleet 前提確認
+  hosts: es-stack
+  gather_facts: false
+  tasks:
+
+    - name: セキュリティ無効の場合は中断
+      ansible.builtin.fail:
+        msg: >-
+          Fleet には xpack.security が必要です。
+          elasticsearch_lab_security_enabled を true にして ES を再構築してください。
+      when: not (elasticsearch_lab_security_enabled | default(false) | bool)
+
+    - name: Fleet 手動セットアップ手順
+      ansible.builtin.debug:
+        msg:
+          - "1. Kibana http://{{ ansible_host }}:5601 を開く"
+          - "2. Stack Management > Fleet で Fleet Server をセットアップ"
+          - "3. Enrollment token を取得し group_vars の fleet_enrollment_token に設定"
+          - "4. fleet_url: https://{{ ansible_host }}:8220"
+          - "5. target VM で Elastic Agent を enroll"

@@ -1,0 +1,30 @@
+# 動的 inventory : create-vms.yaml が Multipass の VM 名・IP から自動生成（手編集しない）
+# target … ログ送信元 / es-stack … Elasticsearch・Kibana の受け皿
+---
+target:
+  hosts:
+{% for item in mp_vm_list %}
+{% set grp = (mp_vms | selectattr('name', 'equalto', item.name) | map(attribute='groups') | first) | default('ungrouped') %}
+{% if grp == 'target' %}
+    {{ item.name }}:
+      ansible_host: {{ item.ipv4[0] }}
+      ansible_user: {{ ansible_user }}
+      ansible_ssh_private_key_file: {{ ansible_ssh_private_key_file }}
+      ansible_ssh_executable: {{ ansible_ssh_executable }}
+      ansible_ssh_common_args: "{{ ansible_ssh_common_args }}"
+{% endif %}
+{% endfor %}
+
+es-stack:
+  hosts:
+{% for item in mp_vm_list %}
+{% set grp = (mp_vms | selectattr('name', 'equalto', item.name) | map(attribute='groups') | first) | default('ungrouped') %}
+{% if grp == 'es-stack' %}
+    {{ item.name }}:
+      ansible_host: {{ item.ipv4[0] }}
+      ansible_user: {{ ansible_user }}
+      ansible_ssh_private_key_file: {{ ansible_ssh_private_key_file }}
+      ansible_ssh_executable: {{ ansible_ssh_executable }}
+      ansible_ssh_common_args: "{{ ansible_ssh_common_args }}"
+{% endif %}
+{% endfor %}

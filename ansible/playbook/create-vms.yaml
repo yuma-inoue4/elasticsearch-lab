@@ -71,15 +71,16 @@
     #--------------------------------
     # 3. 未作成の VM を作成
     #--------------------------------
+    # groups は Ansible inventory 用。multipass launch には渡さない。
+    # disk 未指定時は Multipass デフォルト相当の 5G。
     - name: VM を 1 台ずつ作成
       ansible.builtin.shell: |
         {{ mp_cmd }} launch \
-        --name {{ item.name }} \
-        --memory {{ item.memory }} \
-        --cpus {{ item.cpus }} \
-        --disk {{ item.disk }} \
-        --group {{ item.groups }} \
-        && sleep 5
+          --name {{ item.name }} \
+          --memory {{ item.memory }} \
+          --cpus {{ item.cpus }} \
+          --disk {{ item.disk | default('5G') }} \
+          && sleep 5
       args:
         executable: /bin/bash
       loop: "{{ mp_vms_to_create }}"
@@ -93,9 +94,12 @@
       register: mp_list_after_json
       changed_when: false
 
-    - name: VM一覧を後続プレイ用に保存
+    - name: VM一覧を後続プレイ用に保存（mp_vms 定義にあるものだけ）
       ansible.builtin.set_fact:
-        mp_vm_list: "{{ (mp_list_after_json.stdout | from_json).list }}"
+        mp_vm_list: >-
+          {{ (mp_list_after_json.stdout | from_json).list
+             | selectattr('name', 'in', mp_vms | map(attribute='name') | list)
+             | list }}
 
     - name: VMの作成結果を表示
       ansible.builtin.debug:
@@ -110,11 +114,11 @@
   gather_facts: false
   tasks:
 
-    - name: VMのIPアドレスを取得
+    - name: VMのIPアドレスを取得（groups は mp_vms の定義を使う）
       ansible.builtin.add_host:
         name: "{{ item.name }}"
         ansible_host: "{{ item.ipv4[0] }}"
-        groups: "{{ vm_groups }}"
+        groups: "{{ (mp_vms | selectattr('name', 'equalto', item.name) | map(attribute='groups') | first) | default('ungrouped') }}"
         ansible_user: "{{ ansible_user }}"
         ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file }}"
         ansible_ssh_executable: "{{ ansible_ssh_executable }}"
@@ -171,11 +175,24 @@
       register: key_deploy
       changed_when: key_deploy.stdout is search('ADDED')
 
+    - name: 動的 inventory 出力用ディレクトリを用意
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/../inventory/generated"
+        state: directory
+        mode: "0755"
+
+    # 動的 inventory : Multipass の現状（VM 名・IP）から名簿を自動生成（IP 変更時は create-vms 再実行）
+    - name: 動的 inventory を書き出す（後続 playbook 用）
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/inventory-vms.yaml.j2"
+        dest: "{{ playbook_dir }}/../inventory/generated/vms.yaml"
+        mode: "0644"
+
 #--------------------------------
 # Play3.SSHセットアップ
 #--------------------------------
 - name: SSHセットアップ
-  hosts: target
+  hosts: target:es-stack
   connection: ssh
   gather_facts: false
   tasks:

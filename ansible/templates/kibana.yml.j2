@@ -1,0 +1,13 @@
+# Kibana 設定（vm-es-stack / ES の中身をブラウザで見る UI）
+
+# server.host : 0.0.0.0 … ブラウザから http://<VMのIP>:5601 で開ける
+server.host: "0.0.0.0"
+server.port: 5601
+
+# elasticsearch.hosts : 同じ VM 内の ES に繋ぐ
+elasticsearch.hosts: ["http://127.0.0.1:9200"]
+
+{% if not elasticsearch_lab_security_enabled | bool %}
+# ES 側がセキュリティ off のため、証明書チェックをしない
+elasticsearch.ssl.verificationMode: none
+{% endif %}
