@@ -398,7 +398,7 @@ mp version   # 数秒以内に返れば復旧
 mp list
 ```
 
-`mp-fix` が行うこと（`fix-multipass-windows.ps1`）:
+`scripts/support/multipass-daemon-fix.sh` が行うこと（`multipass-daemon-fix.ps1`）:
 
 1. `multipass.exe` / `multipassd.exe` プロセスを強制終了
 2. Multipass Windows サービスを停止 → 再起動
@@ -422,8 +422,8 @@ mp list    # 問題の VM が消えていることを確認してから作り直
 **それでも直らない場合:**
 
 - Windows を再起動
-- PowerShell（管理者）から `fix-multipass-windows.ps1` を直接実行
-- WSL interop 問題の疑いがある場合: `sudo bash scripts/fix-wsl-multipass-interop.sh` のあと `wsl --shutdown`（PowerShell 側）→ WSL を開き直す
+- PowerShell（管理者）から `scripts/support/multipass-daemon-fix.ps1` を直接実行
+- WSL interop 問題の疑いがある場合: `sudo bash scripts/support/wsl-exe-launch-fix.sh` のあと `wsl --shutdown`（PowerShell 側）→ WSL を開き直す
 
 
 | 症状                                    | 確認すること                                |

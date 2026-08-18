@@ -1,9 +1,9 @@
-# Elasticsearch 設定（vm-es-stack / 単一ノード検証用）
+# Elasticsearch 設定（es-stack / 単一ノード検証用）
 
 # cluster.name : クラスタの名前（複数ノードをまとめるときの識別子）
 cluster.name: {{ elasticsearch_cluster_name }}
 
-# node.name : このノードの名前（inventory のホスト名 = vm-es-stack）
+# node.name : このノードの名前（inventory のホスト名 = es-stack）
 node.name: {{ inventory_hostname }}
 
 # network.host : 0.0.0.0 … 外からも 9200 に繋げる（target VM からログを送れる）

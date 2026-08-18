@@ -14,7 +14,7 @@
 #   4. target 側 playbook で Elastic Agent を enroll
 
 - name: Fleet 前提確認
-  hosts: es-stack
+  hosts: es_stack
   gather_facts: false
   tasks:
 

@@ -1,83 +1,24 @@
 ---
-#--------------------------------
-# multipass（共通）
-#--------------------------------
-# groups … Ansible inventory 用（multipass には渡さない）
-# disk … 省略時は playbook 側で 5G
-mp_vms:
-  - name: vm-target-01
-    memory: 1G
-    cpus: 1
-    disk: 5G
-    groups: target
-  - name: vm-target-02
-    memory: 1G
-    cpus: 1
-    disk: 5G
-    groups: target
-  - name: vm-es-stack
-    memory: 4G
-    cpus: 2
-    disk: 10G
-    groups: es-stack
-
-# OS 別コマンド（playbook で mp_cmd に選択）
-mp_cmd_win: multipass.exe
-mp_cmd_mac: multipass
-
-#--------------------------------
-# SSH（共通）
-#--------------------------------
-# Multipass VM へのログインユーザー（両 OS とも ubuntu）
-ansible_user: ubuntu
-
-# ControlMaster=no … WSL から Windows ssh.exe 利用時の getsockname エラー回避
-ansible_ssh_common_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ControlMaster=no"
-
-#--------------------------------
-# SSH（Windows / WSL）
-#--------------------------------
-# ssh.exe / Ansible が使う Windows パス（/ 区切り）
-ssh_private_key_win: C:/Users/y.inoue/.ssh/elastic_ed25519
-
-# WSL 上での file / ssh-keygen / lookup 用
-ssh_private_key_win_fs: /mnt/c/Users/y.inoue/.ssh/elastic_ed25519
-ssh_public_key_win_fs: /mnt/c/Users/y.inoue/.ssh/elastic_ed25519.pub
-
-ssh_executable_win: /mnt/c/Windows/System32/OpenSSH/ssh.exe
-ansible_windows_user: y.inoue
-
-#--------------------------------
-# SSH（Mac）
-#--------------------------------
-ssh_private_key_mac: "{{ lookup('env', 'HOME') }}/.ssh/elastic_ed25519"
-ssh_public_key_mac: "{{ lookup('env', 'HOME') }}/.ssh/elastic_ed25519.pub"
-ssh_executable_mac: ssh
-
-#--------------------------------
 # Elasticsearch / Kibana（es-stack）
-#--------------------------------
-# elastic_stack_major : apt リポジトリのメジャーバージョン（8.x）
+# Apple Silicon では ansible_architecture が aarch64 になる。Beats 導入時は elastic_deb_arch を使う。
+
+elastic_deb_arch: "{{ 'arm64' if ansible_architecture in ['aarch64', 'arm64'] else 'amd64' }}"
+
+# elastic_stack_major : apt リポジトリのメジャーバージョン
 elastic_stack_major: "8"
 # elastic_version : インストールする ES / Kibana のバージョン
 elastic_version: "8.15.0"
-# elasticsearch_cluster_name : クラスタ名（elasticsearch.yml の cluster.name）
 elasticsearch_cluster_name: elasticsearch-lab
-# elasticsearch_heap_size : JVM が使うメモリ上限（4G VM 向けに 1g）
+# JVM heap。es-stack は 4G VM なので 1g
 elasticsearch_heap_size: "1g"
 
-# elasticsearch_lab_security_enabled : false … 検証用に認証・TLS オフ（本番・Fleet 利用時は true）
+# 検証用に認証・TLS オフ（Fleet 利用時は true）
 elasticsearch_lab_security_enabled: false
-
-# kibana_enable : true … Kibana（5601）も同 VM に入れる
 kibana_enable: true
-# fleet_enable : false … Fleet（Agent の司令塔）は今は使わない（Filebeat 直送）
 fleet_enable: false
-# fleet_url / fleet_enrollment_token : Elastic Agent 登録用（Fleet 有効時に設定）
 fleet_url: ""
 fleet_enrollment_token: ""
 
-# elasticsearch_host / kibana_host : target の Filebeat が送り先として参照
-# setup-elasticsearch 実行後は inventory/generated/elasticsearch.yaml も更新される
-elasticsearch_host: "http://192.168.252.8:9200"
-kibana_host: "http://192.168.252.8:5601"
+# target の Filebeat 等が参照する。inventory の es-stack IP から組み立てる
+elasticsearch_host: "http://{{ hostvars['es-stack']['ansible_host'] }}:9200"
+kibana_host: "http://{{ hostvars['es-stack']['ansible_host'] }}:5601"

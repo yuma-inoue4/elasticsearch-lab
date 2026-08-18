@@ -1,0 +1,13 @@
+---
+# Elastic Agent（Fleet 経由）。初期構成では未使用。
+# Filebeat 直送を先に入れる場合は sample_workload.yaml 側を使う。
+
+- name: Elastic Agent は未実装
+  hosts: targets
+  gather_facts: false
+  tasks:
+    - name: 案内
+      ansible.builtin.debug:
+        msg: >-
+          elastic_agent.yaml は未実装です。
+          Fleet を使う場合は elasticsearch_lab_security_enabled: true のあと setup-fleet.yaml を実行してください。

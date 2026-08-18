@@ -1,2 +1,4 @@
 .DS_Store
+state/
+ansible/inventory/hosts.yaml
 ansible/inventory/generated/*.yaml

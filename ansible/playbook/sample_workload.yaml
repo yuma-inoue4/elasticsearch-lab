@@ -1,0 +1,12 @@
+---
+# 検証用ログ生成 + Filebeat。次の実装対象。
+
+- name: Sample workload は未実装
+  hosts: targets
+  gather_facts: false
+  tasks:
+    - name: 案内
+      ansible.builtin.debug:
+        msg: >-
+          ログ生成スクリプトと Filebeat は未実装です。
+          設計は docs/sekkei-log.md を参照してください。

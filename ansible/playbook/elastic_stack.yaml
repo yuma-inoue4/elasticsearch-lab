@@ -1,0 +1,200 @@
+---
+# es-stack 向け Elasticsearch / Kibana
+# 前提: bash scripts/vms-create.sh 済み。実行は bash scripts/controller-ansible-run.sh
+
+- name: Setup Elasticsearch on es-stack
+  hosts: es_stack
+  become: true
+  tasks:
+
+    - name: vm.max_map_count を設定
+      ansible.builtin.command: sysctl -w vm.max_map_count=262144
+      changed_when: true
+
+    - name: 永続化 vm.max_map_count
+      ansible.builtin.lineinfile:
+        path: /etc/sysctl.d/99-elasticsearch.conf
+        line: vm.max_map_count=262144
+        create: true
+        mode: "0644"
+
+    - name: 基本パッケージをインストール
+      ansible.builtin.apt:
+        name:
+          - curl
+          - gnupg
+          - apt-transport-https
+          - ca-certificates
+        state: present
+        update_cache: true
+
+    - name: Elastic GPG キーを配置
+      ansible.builtin.shell: |
+        curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch \
+          | gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+        chmod 644 /usr/share/keyrings/elasticsearch-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/elasticsearch-keyring.gpg
+
+    - name: Elastic apt リポジトリを追加
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/elastic-{{ elastic_stack_major }}.x.list
+        mode: "0644"
+        content: |
+          deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/{{ elastic_stack_major }}.x/apt stable main
+
+    - name: Elasticsearch をインストール
+      ansible.builtin.apt:
+        name: "elasticsearch={{ elastic_version }}*"
+        state: present
+        update_cache: true
+
+    - name: Elasticsearch 用ディレクトリを用意
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: elasticsearch
+        group: elasticsearch
+        mode: "0750"
+      loop:
+        - /var/lib/elasticsearch
+        - /var/log/elasticsearch
+        - /usr/share/elasticsearch/logs
+
+    - name: elasticsearch.yml を配置
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/elasticsearch.yml.j2"
+        dest: /etc/elasticsearch/elasticsearch.yml
+        owner: root
+        group: elasticsearch
+        mode: "0660"
+      notify: Restart elasticsearch
+
+    - name: JVM heap を配置
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/jvm.heap.options.j2"
+        dest: /etc/elasticsearch/jvm.options.d/heap.options
+        owner: root
+        group: elasticsearch
+        mode: "0644"
+      notify: Restart elasticsearch
+
+    - name: Elasticsearch を起動
+      ansible.builtin.systemd:
+        name: elasticsearch
+        state: started
+        enabled: true
+        daemon_reload: true
+
+    - name: Elasticsearch の起動待ち
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 9200
+        delay: 5
+        timeout: 180
+
+    - name: Elasticsearch 疎通確認
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:9200"
+        method: GET
+        status_code: 200
+      register: es_health
+      retries: 5
+      delay: 10
+      until: es_health.status == 200
+
+    - name: Elasticsearch 疎通結果を表示
+      ansible.builtin.debug:
+        msg: "{{ es_health.json }}"
+
+  handlers:
+    - name: Restart elasticsearch
+      ansible.builtin.systemd:
+        name: elasticsearch
+        state: restarted
+        daemon_reload: true
+
+- name: Setup Kibana on es-stack
+  hosts: es_stack
+  become: true
+  tasks:
+
+    - name: Kibana をインストール
+      ansible.builtin.apt:
+        name: "kibana={{ elastic_version }}*"
+        state: present
+        update_cache: true
+      when: kibana_enable | default(true) | bool
+
+    - name: kibana.yml を配置
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/kibana.yml.j2"
+        dest: /etc/kibana/kibana.yml
+        owner: kibana
+        group: kibana
+        mode: "0640"
+      notify: Restart kibana
+      when: kibana_enable | default(true) | bool
+
+    - name: Kibana を起動
+      ansible.builtin.systemd:
+        name: kibana
+        state: started
+        enabled: true
+        daemon_reload: true
+      when: kibana_enable | default(true) | bool
+
+    - name: Kibana の起動待ち
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 5601
+        delay: 10
+        timeout: 300
+      when: kibana_enable | default(true) | bool
+
+    - name: Kibana URL を表示
+      ansible.builtin.debug:
+        msg: "Kibana: http://{{ ansible_host }}:5601"
+      when: kibana_enable | default(true) | bool
+
+    - name: Kibana はスキップ
+      ansible.builtin.debug:
+        msg: "kibana_enable=false のため Kibana は未インストール"
+      when: not (kibana_enable | default(true) | bool)
+
+  handlers:
+    - name: Restart kibana
+      ansible.builtin.systemd:
+        name: kibana
+        state: restarted
+        daemon_reload: true
+
+- name: Fleet 設定（任意）
+  hosts: es_stack
+  gather_facts: false
+  tasks:
+
+    - name: Fleet は無効（Filebeat 直送を使用）
+      ansible.builtin.debug:
+        msg: >-
+          fleet_enable=false のため Fleet Server は未設定。
+          Elastic Agent を使う場合は elasticsearch_lab_security_enabled を true にし、
+          playbook/setup-fleet.yaml を実行してください。
+      when: not (fleet_enable | default(false) | bool)
+
+    - name: Fleet 有効時の案内
+      ansible.builtin.debug:
+        msg: >-
+          fleet_enable=true ですが、Fleet 自動セットアップは setup-fleet.yaml で実施してください。
+          fleet_url={{ fleet_url | default('未設定') }}
+      when: fleet_enable | default(false) | bool
+
+- name: 接続先を表示
+  hosts: es_stack
+  gather_facts: false
+  tasks:
+    - name: target 向け接続先を表示
+      ansible.builtin.debug:
+        msg:
+          - "elasticsearch_host: http://{{ ansible_host }}:9200"
+          - "kibana_host: http://{{ ansible_host }}:5601"

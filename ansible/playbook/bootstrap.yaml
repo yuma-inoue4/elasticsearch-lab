@@ -1,0 +1,16 @@
+---
+# 管理対象 VM の土台（python3 等）。controller 自身は対象外。
+
+- name: Bootstrap managed nodes
+  hosts: es_stack:targets
+  become: true
+  tasks:
+    - name: 基本パッケージを入れる
+      ansible.builtin.apt:
+        name:
+          - python3
+          - python3-apt
+          - ca-certificates
+          - curl
+        state: present
+        update_cache: true
