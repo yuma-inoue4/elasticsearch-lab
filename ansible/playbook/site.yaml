@@ -4,3 +4,4 @@
 
 - import_playbook: bootstrap.yaml
 - import_playbook: elastic_stack.yaml
+- import_playbook: sample_workload.yaml

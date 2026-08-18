@@ -25,12 +25,11 @@ Windows はホストに Multipass を入れ、WSL2 から実行する。旧 VM�
 ```bash
 bash scripts/vms-delete.sh --legacy          # 旧構成の VM を削除（任意）
 bash scripts/vms-create.sh                   # 4 台起動 + controller に Ansible を入れる
-bash scripts/controller-ansible-run.sh       # es-controller 上で site.yaml（bootstrap + ES/Kibana）
+bash scripts/controller-ansible-run.sh       # bootstrap + ES/Kibana + ログ生成/Filebeat
 ```
 
 Multipass が無応答なら `bash scripts/support/multipass-daemon-fix.sh`。
 
 ## まだ未実装
 
-- target への Filebeat / ログ生成（`playbook/sample_workload.yaml`）
 - Elastic Agent / Fleet（`playbook/elastic_agent.yaml`）

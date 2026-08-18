@@ -15,6 +15,7 @@ elasticsearch_heap_size: "1g"
 # 検証用に認証・TLS オフ（Fleet 利用時は true）
 elasticsearch_lab_security_enabled: false
 kibana_enable: true
+kibana_i18n_locale: "ja-JP"
 fleet_enable: false
 fleet_url: ""
 fleet_enrollment_token: ""
@@ -22,3 +23,14 @@ fleet_enrollment_token: ""
 # target の Filebeat 等が参照する。inventory の es-stack IP から組み立てる
 elasticsearch_host: "http://{{ hostvars['es-stack']['ansible_host'] }}:9200"
 kibana_host: "http://{{ hostvars['es-stack']['ansible_host'] }}:5601"
+
+#--------------------------------
+# 検証ログ（targets）
+#--------------------------------
+es_lab_log_dir: /var/log/es-lab
+es_lab_log_file: /var/log/es-lab/app.log
+es_lab_service_name: dummy-app
+es_lab_paths:
+  - /api/ping
+es_lab_log_interval: 60s
+filebeat_enable: true

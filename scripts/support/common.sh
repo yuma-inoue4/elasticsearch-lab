@@ -128,7 +128,8 @@ ensure_ssh_key() {
   mkdir -p "${SSH_DIR}"
   chmod 700 "${SSH_DIR}"
   if [[ ! -f "${SSH_KEY}" ]]; then
-    ssh-keygen -t ed25519 -f "${SSH_KEY}" -N "" -C "elasticsearch-lab"
+    echo "SSH 鍵を作成: ${SSH_KEY}" >&2
+    ssh-keygen -q -t ed25519 -f "${SSH_KEY}" -N "" -C "elasticsearch-lab"
   fi
   chmod 600 "${SSH_KEY}"
   chmod 644 "${SSH_PUBKEY}"

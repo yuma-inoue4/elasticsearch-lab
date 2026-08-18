@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# 1 実行で JSON ログを 1 行追記する（systemd timer から呼ばれる）
+set -euo pipefail
+
+LOG_DIR="{{ es_lab_log_dir }}"
+LOG_FILE="{{ es_lab_log_file }}"
+SERVICE_NAME="{{ es_lab_service_name }}"
+
+mkdir -p "${LOG_DIR}"
+
+HOST_NAME="$(hostname)"
+TIMESTAMP="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+LEVELS=("INFO" "INFO" "INFO" "INFO" "WARN" "ERROR")
+LEVEL="${LEVELS[$RANDOM % {{ '${#LEVELS[@]}' }}]}"
+
+PATHS=(
+{% for p in es_lab_paths %}
+  "{{ p }}"
+{% endfor %}
+)
+REQ_PATH="${PATHS[$RANDOM % {{ '${#PATHS[@]}' }}]}"
+
+STATUS=200
+MESSAGE="request completed"
+
+if [ "${LEVEL}" = "WARN" ]; then
+  STATUS=429
+  MESSAGE="request retry required"
+elif [ "${LEVEL}" = "ERROR" ]; then
+  STATUS=500
+  MESSAGE="internal error occurred"
+fi
+
+DURATION_MS=$((RANDOM % 900 + 10))
+
+cat >> "${LOG_FILE}" <<EOF
+{"timestamp":"${TIMESTAMP}","level":"${LEVEL}","service":"${SERVICE_NAME}","host":"${HOST_NAME}","message":"${MESSAGE}","path":"${REQ_PATH}","status":${STATUS},"duration_ms":${DURATION_MS}}
+EOF
+
+chmod 644 "${LOG_FILE}"

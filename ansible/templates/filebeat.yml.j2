@@ -1,0 +1,27 @@
+# target 上の Filebeat。/var/log/es-lab/app.log を ES へ送る
+# ndjson は lab.* に入れる。root の service / host は ECS では object なので、
+# JSON の文字列 service/host を root に置くと mapping 衝突で 400 になる。
+
+filebeat.inputs:
+  - type: filestream
+    id: es-lab-app-log
+    enabled: true
+    paths:
+      - {{ es_lab_log_file }}
+    parsers:
+      - ndjson:
+          target: "lab"
+          overwrite_keys: false
+
+processors:
+  - add_host_metadata: ~
+
+setup.template.enabled: true
+setup.ilm.enabled: true
+setup.dashboards.enabled: false
+
+output.elasticsearch:
+  hosts:
+    - "{{ elasticsearch_host }}"
+
+logging.level: info

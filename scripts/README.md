@@ -58,6 +58,8 @@ bash scripts/vms-delete.sh --legacy     # 旧名 vm-target-01 なども消す
 
 ホストの `ap`（WSL の Ansible）では作り込みしません。
 
+引数なしの `site.yaml` は bootstrap → Elasticsearch / Kibana → 検証ログと Filebeat まで実行する。
+
 ---
 
 ## 役割の切り分け

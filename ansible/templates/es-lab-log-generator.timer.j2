@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Elasticsearch lab log generator every minute
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec={{ es_lab_log_interval }}
+Unit=es-lab-log-generator.service
+
+[Install]
+WantedBy=timers.target

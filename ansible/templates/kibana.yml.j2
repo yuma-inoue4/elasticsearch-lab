@@ -11,3 +11,6 @@ elasticsearch.hosts: ["http://127.0.0.1:9200"]
 # ES 側がセキュリティ off のため、証明書チェックをしない
 elasticsearch.ssl.verificationMode: none
 {% endif %}
+
+# UI 言語（変更後は Kibana 再起動が必要）
+i18n.locale: "{{ kibana_i18n_locale }}"

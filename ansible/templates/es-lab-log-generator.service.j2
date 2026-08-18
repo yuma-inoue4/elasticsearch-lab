@@ -1,0 +1,6 @@
+[Unit]
+Description=Generate Elasticsearch lab log
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/es-lab-log-generator.sh

@@ -1,0 +1,5 @@
+es_lab_service_name: dummy-pay
+es_lab_paths:
+  - /api/charges
+  - /api/refunds
+  - /api/wallets

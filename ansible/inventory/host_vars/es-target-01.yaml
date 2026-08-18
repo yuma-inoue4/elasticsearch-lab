@@ -1,0 +1,5 @@
+es_lab_service_name: dummy-shop
+es_lab_paths:
+  - /api/orders
+  - /api/cart
+  - /api/items

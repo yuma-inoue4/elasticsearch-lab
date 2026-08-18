@@ -1,12 +1,135 @@
 ---
-# 検証用ログ生成 + Filebeat。次の実装対象。
+# target 向け: 検証ログ生成 + Filebeat
+# 前提: bash scripts/vms-create.sh と elastic_stack.yaml 済み
+# 実行: bash scripts/controller-ansible-run.sh（site.yaml 経由）
 
-- name: Sample workload は未実装
+- name: 検証ログを生成する
   hosts: targets
-  gather_facts: false
+  become: true
   tasks:
-    - name: 案内
+
+    - name: ログ出力ディレクトリを作成
+      ansible.builtin.file:
+        path: "{{ es_lab_log_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: ログ生成スクリプトを配置
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/es-lab-log-generator.sh.j2"
+        dest: /usr/local/bin/es-lab-log-generator.sh
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: systemd service を配置
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/es-lab-log-generator.service.j2"
+        dest: /etc/systemd/system/es-lab-log-generator.service
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload systemd for log generator
+
+    - name: systemd timer を配置
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/es-lab-log-generator.timer.j2"
+        dest: /etc/systemd/system/es-lab-log-generator.timer
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload systemd for log generator
+
+    - name: ログ生成 timer を有効化して起動
+      ansible.builtin.systemd:
+        name: es-lab-log-generator.timer
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    - name: 初回ログを 1 行書く
+      ansible.builtin.command: /usr/local/bin/es-lab-log-generator.sh
+      changed_when: true
+
+  handlers:
+    - name: Reload systemd for log generator
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+- name: Filebeat で Elasticsearch へ送る
+  hosts: targets
+  become: true
+  tasks:
+
+    - name: Filebeat はスキップ
       ansible.builtin.debug:
-        msg: >-
-          ログ生成スクリプトと Filebeat は未実装です。
-          設計は docs/sekkei-log.md を参照してください。
+        msg: "filebeat_enable=false のため Filebeat は未インストール"
+      when: not (filebeat_enable | default(true) | bool)
+
+    - name: Elastic GPG キーを配置
+      ansible.builtin.shell: |
+        curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch \
+          | gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+        chmod 644 /usr/share/keyrings/elasticsearch-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/elasticsearch-keyring.gpg
+      when: filebeat_enable | default(true) | bool
+
+    - name: Elastic apt リポジトリを追加
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/elastic-{{ elastic_stack_major }}.x.list
+        mode: "0644"
+        content: |
+          deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/{{ elastic_stack_major }}.x/apt stable main
+      when: filebeat_enable | default(true) | bool
+
+    - name: Filebeat をインストール
+      ansible.builtin.apt:
+        name: "filebeat={{ elastic_version }}*"
+        state: present
+        update_cache: true
+      when: filebeat_enable | default(true) | bool
+
+    - name: filebeat.yml を配置
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/filebeat.yml.j2"
+        dest: /etc/filebeat/filebeat.yml
+        owner: root
+        group: root
+        mode: "0640"
+      notify: Restart filebeat
+      when: filebeat_enable | default(true) | bool
+
+    - name: Filebeat を起動
+      ansible.builtin.systemd:
+        name: filebeat
+        state: started
+        enabled: true
+        daemon_reload: true
+      when: filebeat_enable | default(true) | bool
+
+    - name: Elasticsearch への到達を確認
+      ansible.builtin.uri:
+        url: "{{ elasticsearch_host }}"
+        method: GET
+        status_code: 200
+      retries: 5
+      delay: 5
+      when: filebeat_enable | default(true) | bool
+
+    - name: Filebeat の送り先を表示
+      ansible.builtin.debug:
+        msg:
+          - "log: {{ es_lab_log_file }}"
+          - "service: {{ es_lab_service_name }}"
+          - "elasticsearch_host: {{ elasticsearch_host }}"
+      when: filebeat_enable | default(true) | bool
+
+  handlers:
+    - name: Restart filebeat
+      ansible.builtin.systemd:
+        name: filebeat
+        state: restarted
+        daemon_reload: true
