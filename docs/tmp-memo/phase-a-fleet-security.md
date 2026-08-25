@@ -5,7 +5,8 @@
 
 **ゴール:** Kibana にログインでき、**Fleet** 画面が使え、**Fleet Server** が動き、あとで Agent を登録するための **Enrollment token** と **Fleet URL** が控えてある状態。
 
-**同一内容の控え（setup-memo にも追記あり）:** [`setup-memo.md`](./setup-memo.md) の「フェーズ A 詳細手順」節。
+**解説を厚くした版（推奨）:** [`setup-memo.md`](./setup-memo.md) の「フェーズ A 詳細手順」節（用語・証明書・各引数の意味つき）。  
+本ファイルはコマンド中心の控え用。
 
 ### パート構成
 
