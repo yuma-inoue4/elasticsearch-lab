@@ -1,0 +1,56 @@
+---
+# Kibana Saved Objects（データビュー等）を NDJSON から import する。
+# - NDJSON が存在しない場合は何もしない（lab 用の安全策）
+# - import 用ファイルは `ansible/kibana/exports/*.ndjson` に置く
+#
+# 例:
+#   ansible/kibana/exports/data-views.ndjson
+#   ansible/kibana/exports/dashboards.ndjson
+#
+- name: Import Kibana saved objects
+  hosts: es_stack
+  become: false
+  gather_facts: false
+  tasks:
+    - name: NDJSON export ファイル一覧を取得
+      ansible.builtin.set_fact:
+        kibana_ndjson_files: "{{ lookup('fileglob', playbook_dir ~ '/../kibana/exports/*.ndjson', wantlist=True) }}"
+
+    - name: NDJSON が無い場合はスキップ
+      ansible.builtin.debug:
+        msg: "Kibana saved objects NDJSON が見つからないため import をスキップ: {{ playbook_dir }}/../kibana/exports/*.ndjson"
+      when: (kibana_ndjson_files | length) == 0
+
+    - name: Import 用一時ディレクトリを作成
+      ansible.builtin.file:
+        path: /tmp/kibana-saved-objects-import
+        state: directory
+        mode: "0755"
+      when: (kibana_ndjson_files | length) > 0
+
+    - name: NDJSON を es-stack にコピー
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "/tmp/kibana-saved-objects-import/{{ item | basename }}"
+        mode: "0644"
+      loop: "{{ kibana_ndjson_files }}"
+      when: (kibana_ndjson_files | length) > 0
+
+    - name: Kibana に import（Saved Objects Import API）
+      ansible.builtin.shell: >-
+        curl -fsS
+        -X POST "http://127.0.0.1:5601/api/saved_objects/_import?overwrite=true"
+        -H "kbn-xsrf: true"
+        -F "file=@/tmp/kibana-saved-objects-import/{{ item | basename }}"
+      args:
+        warn: false
+      register: import_result
+      loop: "{{ kibana_ndjson_files }}"
+      when: (kibana_ndjson_files | length) > 0
+
+    - name: Import結果（最後のものだけ表示）
+      ansible.builtin.debug:
+        msg: "{{ (import_result.results | last).stdout | default('') }}"
+      when:
+        - (kibana_ndjson_files | length) > 0
+        - import_result is defined

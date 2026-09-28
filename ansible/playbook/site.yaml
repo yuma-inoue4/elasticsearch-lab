@@ -5,3 +5,4 @@
 - import_playbook: bootstrap.yaml
 - import_playbook: elastic_stack.yaml
 - import_playbook: sample_workload.yaml
+- import_playbook: kibana_saved_objects_import.yaml
