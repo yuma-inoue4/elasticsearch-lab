@@ -8,7 +8,9 @@
 
 ### 現在の進捗
 
-ラップトップ上に Multipass（VM 4台）を用意し、Ansible を使って環境構築自体は一度完了している。
+- ラップトップ上に Multipass（VM 4台）を用意し、Ansible を使って環境構築自体は一度完了している（横置き）。
+- Docker / Compose の基礎学習（WSL）は一段落。本題の **ES クラスタを Compose で起動** に進む。
+- 本番（Elastic Cloud）は **Fleet 利用あり**。ただし試験環境の初期フェーズには含めない（後述）。
 
 ### 扱うデータ・用途
 
@@ -59,20 +61,42 @@ Multipass と Ansible の構成を一度横に置き、Docker Compose を用い�
 - **障害テストが容易**  
   コマンド一つで特定のノードを即座に停止・再開できるため、SRE としての検証に最適。
 
-## 5. 次の一手
+## 5. フェーズ分けと確定要件
 
-環境を Docker ベースに切り替えるにあたり、まずは Mac と Windows のどちらでも動く **土台（Elastic 3ノード + Kibana）** を立ち上げる。
+環境を Docker ベースに切り替える。まずは Mac / Windows 共通で動く土台を固め、Security / Fleet は後段とする。
 
-### 作業前に確認すること
+### フェーズ1（今やる・土台）— 確定要件（2026-10-16）
 
-1. 手元の Mac と Windows に Docker Desktop（または WSL2 上の Docker）はすでにインストールされているか。
-2. 構築する Elasticsearch のバージョン（例: 8.15.0 など、本番に合わせるマイナーバージョン）の希望はあるか。
+| 項目 | 内容 |
+|------|------|
+| 構成 | Elasticsearch **3ノード** + Kibana |
+| 版 | **8.5.2**（2026-10-16 時点の本番 Elastic Cloud に合わせる） |
+| Security | **含めない（OFF）** |
+| Fleet | **含めない**（本番は利用中だが、初期フェーズでは後回し） |
+| 実行環境 | **Windows: WSL2 + Docker Engine（CLI）** / **Mac: OrbStack（CLI 中心）** |
+| ホストメモリ | Windows / Mac とも **約 32GB**（PC 本体） |
+| コンテナメモリ目安 | ES 各 **2GB**（ヒープ **1GB**）×3、Kibana **1GB** |
+| 完了条件 | `_cat/nodes` で3ノード見える / Kibana が開く / 同一 compose で両 OS 再現 / `down`→`up` で再現できる |
 
-### メモ（リポジトリ現状・2026-09 時点）
+イメージ例:
 
-- 既存 Ansible lab の版: `elastic_version: "8.15.0"`
+- `docker.elastic.co/elasticsearch/elasticsearch:8.5.2`
+- `docker.elastic.co/kibana/kibana:8.5.2`
+
+※ 旧 Multipass/Ansible lab の `8.15.0` とは混ぜない（本番トレース優先で 8.5.2）。
+
+### フェーズ2（あとで）
+
+- Security ON
+- Fleet + Fleet Server（必要なら Agent）
+- ILM / アラート / ノード障害試験 など（SRE テーマ本線）
+
+### メモ（リポジトリ現状・2026-10 時点）
+
+- Compose 基礎練習: `docker/containers/compose-prac/` あり
+- ES 用の本番トレース向け `docker-compose.yml` はこれから作成
 - Multipass / Ansible 構成は横置き（削除必須ではない）
-- `docker-compose.yml` は未作成
+- **手順書（解説多め）:** [`el-setup-manual.md`](./el-setup-manual.md)
 
 ## 6. 作業の進め方（前回の反省）
 
