@@ -1,0 +1,33 @@
+# 基礎コマンド
+docker compose up 
+
+# tips
+docker compose を実行すると、未指定でも docker network を作成する (〇〇_default という名称で作成される)
+
+image に対するデフォルトのポートは決まっている (docker hub から image 名で検索したら確認できる) 
+image に対して、設定したほうが良い環境変数がある （docker hub から image名で検索したら確認できる)
+
+# tips: compose のvolumes に関して
+volumesを定義する個所は 2個所ある
+1. 各サービス内のvolumes
+2. トップ(=全体)のvolumes
+
+使い分けとしては、全体のvolumesでは、ラベルの指定だけ       (=宣言)
+そのラベルの詳細(=パス等)は、各サービスのvolumes で定義する (=代入・実態)
+
+# tips: compose にも exec コマンドがある
+例) docker compose exec {service名} bash
+例) docker compose exec db bash
+
+# tips: compose down と -v
+docker compose down       … コンテナ・ネットワークを削除（名前付きボリュームは残る）
+docker compose down -v    … 上記に加え、この compose が作った名前付きボリュームも削除
+※ initdb の SQL をやり直したいときは down -v のあと up（初回起動時だけ SQL が走るため）
+※ バインドマウント元のホストファイルは消えない
+
+# tips: 再ビルト(composeファイルに加えた変更をコンテナに適用させたい時に)
+docker compose up --build
+
+# tips: ユーザが作成した docker-network のみ、コンテナ間での名前解決が機能する
+例) root@82985a:/# curl http://my-nginx-2 -> Welcome to nginx!
+ただし、デフォルトの bridge では機能しない

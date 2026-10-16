@@ -1,0 +1,22 @@
+version: '3.9' # composerのバージョン
+
+services: # コンテナの定義
+  api: # コンテナの名称（＝単位）
+    build: ./webapi # ビルドコンテキスト(このファイルから見た相対パス)
+    ports: 
+      - 8080:8080
+    depends_on: # サービス間の依存関係（db コンテナが起動してから api コンテナを起動）
+      - db
+  db:
+    image: postgres:15 # 既成のイメージを使用するならば、image オプション
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=appdb
+    volumes:
+      - db-storage:/var/lib/postgresql/data    # dbコンテナのデータを保存するボリューム
+      - ./webapi/db/initdb:/docker-entrypoint-initdb.d # dbコンテナにどんなテーブル作成するのか、初期構築するスクリプト(バインドマウント)
+volumes:
+  db-storage:
