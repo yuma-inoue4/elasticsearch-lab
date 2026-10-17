@@ -1,38 +1,36 @@
 # Qiita 作業手順メモ（下書き）
 
-**進捗:** セクション5の32まで完了。レイヤー / `ENV`・`ARG` / `WORKDIR` まで追記済み。次回は教材の続きから。
+**進捗:** 教材セクション5・ネットワーク（ホスト↔コンテナのポート／`network inspect`）まで。次回は続きから。
 
 ---
 
 ## Docker の概要
 
-- **イメージ**（ファイル）を基に **コンテナ** を作成する
-- イメージは Docker Hub 等のレジストリから入手、または自作する
-- 利用可能なバージョンはレジストリの Web ページから確認する
+- **イメージ**を基に **コンテナ** を作成する
+- イメージは Docker Hub 等から取得、または自作する
+- バージョンはレジストリの Web ページで確認する
 
 ---
 
-## 基礎コマンド（用途別）
+## 基礎コマンド
 
-### イメージ操作
+### イメージ
 
 ```bash
-docker image pull {image}            # レジストリから取得
+docker image pull {image}            # 取得
 docker image ls                      # 一覧
 docker image inspect {image}         # 詳細（Config → Cmd など）
-docker image history {image}       # レイヤー履歴を表示
+docker image history {image}         # レイヤー履歴
 docker image rm {image}              # 削除
-docker image build {context_path}    # Dockerfile からビルド
+docker image build {context_path}    # ビルド
 docker image build -t {tag} {path}   # タグ付きビルド
 ```
 
-
-
-### コンテナの起動・停止・削除
+### コンテナ（起動・停止・削除）
 
 ```bash
-docker container run {image}         # 新規作成・起動
-docker container ls                  # 一覧（稼働中）
+docker container run {image}         # 作成・起動
+docker container ls                  # 稼働中一覧
 docker container stop {container}    # 停止
 docker container restart {container} # 再起動
 docker container rm {container}      # 削除（exited のみ。先に stop）
@@ -53,7 +51,7 @@ docker container attach {container}
 
 
 
-### 動作確認（よく使う run）
+### よく使う run
 
 ```bash
 docker container run -it {image}
@@ -68,13 +66,15 @@ docker run --rm hello-world
 ## よく使うオプション
 
 
-| オプション  | 意味                                |
-| ------ | --------------------------------- |
-| `-i`   | 標準入力を有効                           |
-| `-t`   | TTY を割り当て（`run`）／タグ付け（`build -t`） |
-| `-d`   | デタッチドで起動                          |
-| `--rm` | 終了後にコンテナを自動削除                     |
-| `-f`   | 強制（`rm -f` で稼働中も削除）               |
+| オプション  | 意味                               |
+| ------ | -------------------------------- |
+| `-i`   | 標準入力を有効                          |
+| `-t`   | TTY 割り当て（`run`）／タグ付け（`build -t`） |
+| `-d`   | デタッチド起動                          |
+| `--rm` | 終了後にコンテナを自動削除                    |
+| `-f`   | 強制（`rm -f` で稼働中も削除）              |
+| `-v`   | ボリューム／バインドマウント                   |
+| `-p`   | ホスト:コンテナのポート紐付け                  |
 
 
 ---
@@ -94,11 +94,11 @@ sudo systemctl enable --now docker
 sudo usermod -aG docker "$USER"
 ```
 
-グループ反映のため、一度 WSL を終了してから開き直す。
+グループ反映のため、一度 WSL を終了して開き直す。
 
 ### Mac（OrbStack）
 
-Docker Desktop の代わりに OrbStack。操作は `docker` / `docker compose`。
+Docker Desktop の代わり。操作は `docker` / `docker compose`。
 
 前提: `brew -v`
 
@@ -119,11 +119,11 @@ docker run --rm hello-world
 
 
 
-### ビルド時の debconf メッセージ（参考）
+### ビルド時の debconf（参考）
 
-`debconf: delaying package configuration, since apt-utils is not installed` は **エラーではない**（最小 Ubuntu イメージでよく出る）。`Successfully built` なら成功。
+`debconf: delaying package configuration, since apt-utils is not installed` は **エラーではない**。`Successfully built` なら成功。
 
-静かにしたい場合:
+抑制したい場合:
 
 ```dockerfile
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y curl
@@ -142,14 +142,14 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y curl
 ```dockerfile
 COPY {追加元} {追加先}   # 無いディレクトリはコンテナ側で作成される
 
-CMD ["実行ファイル", "パ1", "パ2"]   # デフォルトコマンド（複数行あっても最後の CMD のみ有効）
+CMD ["実行ファイル", "引数1", "引数2"]   # デフォルトコマンド（複数ある場合は最後のみ有効）
 ```
 
 
 
 ### ビルドコンテキスト / `.dockerignore`
 
-- **ビルドコンテキスト:** `docker image build` で Docker に送る素材一式（Dockerfile もこの配下）
+- **ビルドコンテキスト:** `docker image build` で送る素材一式（Dockerfile も含む）
 - `**.dockerignore`:** コンテキストから除外（大容量・秘密情報など）
 
 ```bash
@@ -163,11 +163,11 @@ touch .dockerignore
 
 ## レイヤーとキャッシュ
 
-- レイヤーは普段意識しにくいが、**イメージの各命令（**`RUN` **など）がレイヤー**になる
-- `docker image history {image}` で確認できる
-- `**&&` で1つの `RUN` にまとめる**とレイヤー数・容量を減らせる
-- ただし **まとめた** `RUN` **全体を変更すると、そのレイヤー以降のキャッシュが無効**になる  
-→ `apt update` などは毎回走り直し。初期構築では **変更頻度の低い塊と高い塊を分ける**とよい
+- 各命令（`RUN` など）が **レイヤー**になる
+- 確認: `docker image history {image}`
+- `&&` で1つの `RUN` にまとめるとレイヤー数・容量を減らせる
+- まとめた `RUN` を変更すると、そのレイヤー以降のキャッシュが無効になる  
+→ 変更頻度の低い処理と高い処理は分けた方がよい
 
 ---
 
@@ -176,18 +176,17 @@ touch .dockerignore
 ## 環境変数: `ARG` と `ENV`
 
 
-| 指令                  | 有効なタイミング               | 用途                  |
-| ------------------- | ---------------------- | ------------------- |
-| `ARG {key}={value}` | **ビルド時のみ**（コンテナ実行時は無効） | ビルド時の一時パラメータ        |
-| `ENV {key}={value}` | **ビルド時 + コンテナ実行時**     | コンテナ内で参照・動的に書き換えたい値 |
+| 指令                  | 有効なタイミング       | 用途           |
+| ------------------- | -------------- | ------------ |
+| `ARG {key}={value}` | **ビルド時のみ**     | ビルド時の一時パラメータ |
+| `ENV {key}={value}` | **ビルド時 + 実行時** | コンテナ内で使う値    |
 
 
-**使い分け（結論）:** コンテナ実行中も使う／中身を動的に変えたい → `ENV`。イメージ作成時だけ → `ARG`。
+**使い分け:** 実行時も使う → `ENV`。ビルド時だけ → `ARG`。
 
 ```dockerfile
 ARG message="Hello, World!"
 RUN echo $message > message.txt
-
 CMD ["cat", "message.txt"]
 ```
 
@@ -197,57 +196,153 @@ CMD ["cat", "message.txt"]
 
 ## `WORKDIR`
 
-`RUN` / `CMD` などの **作業ディレクトリ**を指定する。未指定時は `/`。
+`RUN` / `CMD` などの作業ディレクトリ。未指定時は `/`。
 
 ```dockerfile
-# 未指定 → / に 1.txt
-RUN touch 1.txt
+RUN touch 1.txt              # / に作成
 
-# /app/my_dir に 2.txt
 WORKDIR /app/my_dir
-RUN touch 2.txt
+RUN touch 2.txt              # /app/my_dir に作成
 
-# /app に 3.txt（一つ上の ..）
 WORKDIR ..
-RUN touch 3.txt
+RUN touch 3.txt              # /app に作成
 ```
 
 ---
 
+
+
 ## マルチステージビルド
 
-段階を分けて imageのビルドを実行する機能で、最終的な image の容量を軽量化できる
+段階を分けてビルドし、最終イメージを軽量化できる。
 
-ステージは、FROM で区切るように書く。
+- ステージは `FROM` で区切る
+- 命名: `FROM {image} AS {stage-name}`
+- 他ステージからコピー: `COPY --from={stage-name} {path}`
+- 開発／本番を1ファイルで管理できる
+- 特定ステージだけビルド: `--target`
 
-また、ステージ単位で命名が可能 例 : FROM {OS-name} AS {stage-name}
+```dockerfile
+FROM ubuntu:22.04 AS base
+# ...
 
-他のステージのファイルを引用したいなら、 COPY --from={stage-name} {directory-path}
+FROM base AS dev
+# ...
 
-また、開発環境、本番環境を1つのDockerfileで管理可能になる
+FROM base AS prod
+# ...
+```
 
-その際、作成したいステージ(=環境) だけのイメージを作成可能 -> docker image build --target {stage-name} {build-context}
+```bash
+docker image build --target {stage-name} {build-context}
+```
 
-
-
-ストレージ
-
-docker のストレージは揮発性(=コンテナ破棄時に消滅)、
-
-永続化させる方法が次の2つ、ボリューム、バインドマウント
-
+---
 
 
-関連コマンド
 
+## ストレージ
+
+コンテナのファイルシステムは **揮発性**（破棄時に消える）。永続化は次の2つ。
+
+
+| 方式           | 共有の範囲      | 特徴                             |
+| ------------ | ---------- | ------------------------------ |
+| **ボリューム**    | 主にコンテナ間    | Docker が管理。ホスト差の影響を受けにくい       |
+| **バインドマウント** | ホスト ↔ コンテナ | ホストのパスを直接マウント。開発向きだが OS／パス差に注意 |
+
+
+**方針（教材寄り）:** 本番・可搬性を意識するなら **ボリューム**。ホストで直接編集したい開発用途ならバインドマウントも使う。
+
+### ボリューム
+
+```bash
 docker volume create {volume-name}
-
 docker volume ls
-
 docker volume inspect {volume-name}
-
 docker volume rm {volume-name}
 
-// ボリュームに接続しながらコンテナを作成する ( container-absolute-path のコンテナのパスにボリュームを接続する )
+# マウントして起動
+docker container run -v {volume-name}:{container-abs-path} {image-name}
 
-docker container run -v {volume-name}:{container-absolute-path} {image-name}
+# 例
+docker run -it -v my-volume:/app1 --name container-1 ubuntu:22.04
+```
+
+
+
+### バインドマウント
+
+```bash
+docker container run -v {host-abs-path}:{container-abs-path} {image-name}
+
+# 例（カレント配下をマウント）
+docker run -it -v "$(pwd)/my-dir:/app" --name app-container ubuntu:22.04
+```
+
+**注意:** ホストパスにスペースがある場合は必ずクォートする。
+
+```bash
+# NG: Google Drive のスペースで引数が割れ、invalid reference format になる
+docker run -itv /Users/.../Google Drive/...:/app3 ubuntu:22.04
+
+# OK
+docker run -it -v "/Users/.../Google Drive/...:/app3" ubuntu:22.04
+# または
+docker run -it -v "$(pwd):/app3" ubuntu:22.04
+```
+
+---
+
+
+
+## ネットワーク
+
+接続の型は大きく2つ。
+
+1. **ホスト ↔ コンテナ** … ポート紐付け（`-p`）が必要
+2. **コンテナ ↔ コンテナ** … 同一ネットワーク上で名前解決など
+
+### ホスト ↔ コンテナ（ポート公開）
+
+```bash
+#---------------------------
+# ホスト - コンテナ間のポートを紐付け
+#---------------------------
+docker container run -p {host-port}:{container-port} {image-name}
+
+# 例: ホスト 3000 → コンテナ 80
+docker run -p 3000:80 nginx
+```
+
+```bash
+#---------------------------
+# 確認
+#---------------------------
+docker network ls
+docker network inspect {network-name}
+
+# 補足: inspect の 項目Containers に、その NW へ接続中のコンテナ（Name / IP など）が載る。
+docker network inspect bridge | grep Containers -A 10
+
+#---------------------------
+# 作成
+#---------------------------
+docker network create {network-name}
+
+# 指定NWにコンテナを作成 
+docker run --name {cont-name} --network {nw-name}
+
+# 指定NWにコンテナを作成する例
+dc run -itd --rm --name my-nginx-2 --network my-net nginx
+```
+
+#異なるdocker network 同士のコンテナは疎通できない (orbstack のエンジンのコンテナは例外)
+
+
+
+tips
+
+#既存のコンテナに入るには？
+
+docker container exec -it {cont-name} bash
