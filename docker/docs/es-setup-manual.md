@@ -132,6 +132,9 @@ Linux カーネルの `vm.max_map_count` が小さいと、**起動に失敗**�
 sysctl vm.max_map_count
 ```
 
+**Mac（OrbStack）:** macOS ホストの `sysctl` ではなく VM 側で確認する。  
+例: `orb sysctl vm.max_map_count` または `docker run --rm --privileged alpine sysctl vm.max_map_count`
+
 `262144` 以上が目安。足りなければ（一時的）:
 
 ```bash
@@ -150,7 +153,7 @@ sudo sysctl -w vm.max_map_count=262144
 リポジトリ内の例:
 
 ```text
-docker/stack/                 … フェーズ1用（名前は好みで可）
+docker/es-stack/              … フェーズ1用
   docker-compose.yml
   .env
 ```
@@ -213,7 +216,7 @@ es02 / es03 の 9200 を全部ホストに出さなくても、クラスタ自�
 ## 5. ファイル例（自分で作成・理解しながら調整）
 
 以下は **ひな形**。そのまま盲目コピーせず、上記の表と対応づけて書くこと。  
-（AI に丸投げせず、自分が `docker/stack/` 等に配置する。）
+（AI に丸投げせず、自分が `docker/es-stack/` 等に配置する。）
 
 ### 5-1. `.env` 例
 
