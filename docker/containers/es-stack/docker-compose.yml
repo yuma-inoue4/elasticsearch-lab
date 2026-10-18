@@ -4,6 +4,7 @@ services:
   #-----------------------------
   # node es01 ~ es03
   #-----------------------------
+  # データを蓄積
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     container_name: es01
@@ -71,6 +72,7 @@ services:
   #-----------------------------
   # kibana
   #-----------------------------
+  # UIを提供
   kibana:
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
     container_name: kibana
@@ -81,6 +83,22 @@ services:
     ports:
       - ${KIBANA_PORT}:5601                                  # ホスト側に公開するポート:コンテナ内のポート
     mem_limit: ${KIBANA_MEM_LIMIT}                           # メモリ使用量の上限
+
+  #-----------------------------
+  # metricbeat
+  #-----------------------------
+  # データを収集
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:${STACK_VERSION}
+    container_name: metricbeat
+    user: root
+    command: ["-e", "-strict.perms=false"]
+    volumes: # ro: 読み取り専用(コンテナ側から書き換え不可)
+      - /var/run/docker.sock:/var/run/docker.sock:ro             # dockerエンジンのソケット
+      - ./metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro # metricbeatの設定ファイル
+    depends_on:
+      - es01
+      - kibana
 
 volumes:
   esdata01:

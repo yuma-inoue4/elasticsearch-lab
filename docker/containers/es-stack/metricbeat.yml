@@ -1,0 +1,22 @@
+metricbeat.modules:
+  - module: docker
+    metricsets:
+      - container # コンテナ名,ID
+      - cpu       # CPU使用率
+      - memory    # メモリ使用率
+      - network   # 送受信バイト数
+      # (参考)他に指定可能なメトリクス一覧
+      # https://www.elastic.co/guide/en/beats/metricbeat/8.5/metricbeat-module-docker.html
+    hosts: ["unix:///var/run/docker.sock"] # 問い合わせ先を指定: dockerエンジンのソケット
+    period: 10s
+
+# 採ったデータの送り先
+output.elasticsearch:
+  hosts: ["http://es01:9200"]
+
+# ダッシュボードを紐付け
+setup.kibana:
+  host: "http://kibana:5601"
+
+# ダッシュボードに紐付けたデータを表示
+setup.dashboards.enabled: true
