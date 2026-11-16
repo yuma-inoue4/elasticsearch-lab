@@ -1,35 +1,31 @@
 # elasticsearch-lab
 
-Multipass VM 4 台の Elasticsearch 検証環境。
+Elasticsearch の試験・検証用リポジトリ。
 
-- **VM 作成・削除・鍵配布**: ホスト（Mac / WSL2）から実行する
-- **ES / Kibana などの作り込み**: 必ず `es-controller` 上の Ansible で実行する（`bash scripts/controller-ansible-run.sh`）
+## 直下の構成
 
-WSL の Ansible は 2.17 系にしてあるが、作り込みはホストの `ap` ではなく controller 経由が正式手順。
+| パス | 役割 |
+|------|------|
+| [`docker/`](docker/) | **本線。** Docker Compose で ES / Kibana などを構築（Mac / Windows 共通） |
+| [`vm/`](vm/) | **横置き。** Multipass VM + Ansible による旧構成 |
+| `README.md` | このファイル |
 
-スクリプトの一覧・対象・使い方は [`scripts/README.md`](scripts/README.md) を見る。
+## 本線（Docker）
 
-## 構成
+方針・要件: [`docker/docs/zentai-keikaku.md`](docker/docs/zentai-keikaku.md)  
+手順書: [`docker/docs/el-setup-manual.md`](docker/docs/el-setup-manual.md)  
+スタック作業ディレクトリ: [`docker/el-stack/`](docker/el-stack/)
 
-| VM | 役割 | 目安 |
-|---|---|---|
-| `es-controller` | Ansible 制御ノード | 2G / 2CPU |
-| `es-stack` | Elasticsearch / Kibana | 4G / 2CPU |
-| `es-target-01` | ログ送信元 | 1G / 1CPU |
-| `es-target-02` | ログ送信元 | 1G / 1CPU |
+実行環境の目安:
 
-## 手順
+- Windows: WSL2 + Docker Engine（CLI）
+- Mac: OrbStack（CLI 中心）
 
-Windows はホストに Multipass を入れ、WSL2 から実行する。旧 VM（`vm-target-*` / `vm-es-stack`）が残っている場合は先に消す。
+## 旧構成（VM / Multipass）
+
+詳細は [`vm/README.md`](vm/README.md) と [`vm/scripts/README.md`](vm/scripts/README.md)。
 
 ```bash
-bash scripts/vms-delete.sh --legacy          # 旧構成の VM を削除（任意）
-bash scripts/vms-create.sh                   # 4 台起動 + controller に Ansible を入れる
-bash scripts/controller-ansible-run.sh       # bootstrap + ES/Kibana + ログ生成/Filebeat
+bash vm/scripts/vms-create.sh
+bash vm/scripts/controller-ansible-run.sh
 ```
-
-Multipass が無応答なら `bash scripts/support/multipass-daemon-fix.sh`。
-
-## まだ未実装
-
-- Elastic Agent / Fleet（`playbook/elastic_agent.yaml`）

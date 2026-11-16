@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 対象: Windows 側の Multipass デーモン（multipassd）
 # すること: 無応答になったデーモンを再起動する（UAC 承認が必要）
-# 使い方: bash scripts/support/multipass-daemon-fix.sh
+# 使い方: bash vm/scripts/support/multipass-daemon-fix.sh
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

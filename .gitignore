@@ -1,4 +1,9 @@
+# 共通
 .DS_Store
-state/
-ansible/inventory/hosts.yaml
-ansible/inventory/generated/*.yaml
+
+# vm
+vm/state/
+vm/ansible/inventory/hosts.yaml
+vm/ansible/inventory/generated/*.yaml
+
+# docker

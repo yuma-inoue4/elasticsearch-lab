@@ -20,3 +20,15 @@ services: # コンテナの定義
       - ./webapi/db/initdb:/docker-entrypoint-initdb.d # dbコンテナにどんなテーブル作成するのか、初期構築するスクリプト(バインドマウント)
 volumes:
   db-storage:
+
+  # memo: 
+  # services: サービスの定義
+  #   api: サービスの名称
+  #     build: ビルドコンテキスト(このファイルから見た相対パス)
+  #     ports: ポートのマッピング
+  #     depends_on: サービス間の依存関係（db コンテナが起動してから api コンテナを起動）
+  #   db: サービスの名称
+  #     image: 既成のイメージを使用するならば、image オプション
+  #     ports: ポートのマッピング
+  #     environment: 環境変数の設定
+  #     volumes: ボリュームのマッピング

@@ -6,10 +6,11 @@
 - **直接実行する入口** … この直下の 3 ファイル
 - **単体では実行しないもの・障害時だけ使うもの** … [`support/`](support/)
 
-Ansible の Playbook 本体は `ansible/playbook/` にあります。
+Ansible の Playbook 本体は `vm/ansible/playbook/` にあります。  
+コマンドは **リポジトリ直下**から実行する想定です。
 
 ```bash
-bash scripts/vms-create.sh
+bash vm/scripts/vms-create.sh
 ```
 
 ---
@@ -23,9 +24,9 @@ bash scripts/vms-create.sh
 | `controller-ansible-run.sh` | es-controller 上の Ansible | Playbook を実行する |
 
 ```bash
-bash scripts/vms-delete.sh --legacy     # 旧 VM（vm-target-* 等）があるときだけ
-bash scripts/vms-create.sh
-bash scripts/controller-ansible-run.sh
+bash vm/scripts/vms-delete.sh --legacy     # 旧 VM（vm-target-* 等）があるときだけ
+bash vm/scripts/vms-create.sh
+bash vm/scripts/controller-ansible-run.sh
 ```
 
 SSH で controller に入る必要はありません。`controller-ansible-run.sh` が `multipass exec` で中の `ansible-playbook` を起動します。
@@ -33,7 +34,7 @@ SSH で controller に入る必要はありません。`controller-ansible-run.s
 特定の Playbook だけ回すとき:
 
 ```bash
-bash scripts/controller-ansible-run.sh playbook/elastic_stack.yaml
+bash vm/scripts/controller-ansible-run.sh playbook/elastic_stack.yaml
 ```
 
 ### `vms-create.sh`
@@ -47,8 +48,8 @@ bash scripts/controller-ansible-run.sh playbook/elastic_stack.yaml
 ### `vms-delete.sh`
 
 ```bash
-bash scripts/vms-delete.sh              # 改訂案の 4 台だけ
-bash scripts/vms-delete.sh --legacy     # 旧名 vm-target-01 なども消す
+bash vm/scripts/vms-delete.sh              # 改訂案の 4 台だけ
+bash vm/scripts/vms-delete.sh --legacy     # 旧名 vm-target-01 なども消す
 ```
 
 ### `controller-ansible-run.sh`

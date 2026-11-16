@@ -94,8 +94,8 @@ Multipass と Ansible の構成を一度横に置き、Docker Compose を用い�
 ### メモ（リポジトリ現状・2026-10 時点）
 
 - Compose 基礎練習: `docker/containers/compose-prac/` あり
-- ES 用の本番トレース向け `docker-compose.yml` はこれから作成
-- Multipass / Ansible 構成は横置き（削除必須ではない）
+- ES 用スタック作業場所: `docker/el-stack/`
+- Multipass / Ansible 構成は **`vm/`** 配下に集約（横置き）
 - **手順書（解説多め）:** [`el-setup-manual.md`](./el-setup-manual.md)
 
 ## 6. 作業の進め方（前回の反省）

@@ -2,8 +2,8 @@
 # 対象: es-controller 上の Ansible
 # すること: Playbook を controller の中で実行する（ホストの ap は使わない）
 # 使い方:
-#   bash scripts/controller-ansible-run.sh
-#   bash scripts/controller-ansible-run.sh playbook/elastic_stack.yaml
+#   bash vm/scripts/controller-ansible-run.sh
+#   bash vm/scripts/controller-ansible-run.sh playbook/elastic_stack.yaml
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -17,7 +17,7 @@ if [[ $# -gt 0 ]]; then
 fi
 
 if ! vm_exists es-controller; then
-  echo "es-controller がありません。先に bash scripts/vms-create.sh を実行してください。" >&2
+  echo "es-controller がありません。先に bash vm/scripts/vms-create.sh を実行してください。" >&2
   exit 1
 fi
 

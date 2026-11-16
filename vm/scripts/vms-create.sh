@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 対象: Multipass VM 4 台（es-controller / es-stack / es-target-01 / es-target-02）
 # すること: VM を起動する。中身（ES など）は入れない。controller に Ansible と SSH 鍵を置く。
-# 使い方: bash scripts/vms-create.sh
+# 使い方: bash vm/scripts/vms-create.sh
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

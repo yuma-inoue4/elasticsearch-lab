@@ -166,7 +166,7 @@ wait_ipv4() {
     echo "  ${name}: IPv4 待ち (${i}/${MP_WAIT_IP_RETRIES})"
     sleep "${MP_WAIT_IP_DELAY}"
   done
-  echo "${name} の IPv4 が取得できません。bash scripts/support/multipass-daemon-fix.sh を試してください。" >&2
+  echo "${name} の IPv4 が取得できません。bash vm/scripts/support/multipass-daemon-fix.sh を試してください。" >&2
   return 1
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 対象: WSL2 から Windows の .exe（multipass.exe など）を起動する仕組み
 # すること: WSLInterop（binfmt）を直す。Mac では不要。
-# 使い方: sudo bash scripts/support/wsl-exe-launch-fix.sh
+# 使い方: sudo bash vm/scripts/support/wsl-exe-launch-fix.sh
 set -euo pipefail
 
 if [[ "${EUID}" -ne 0 ]]; then

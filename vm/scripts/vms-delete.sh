@@ -2,8 +2,8 @@
 # 対象: Multipass VM（lab 用）
 # すること: VM を削除する
 # 使い方:
-#   bash scripts/vms-delete.sh           # 改訂案の 4 台
-#   bash scripts/vms-delete.sh --legacy  # 旧 vm-target-* / vm-es-stack も削除
+#   bash vm/scripts/vms-delete.sh           # 改訂案の 4 台
+#   bash vm/scripts/vms-delete.sh --legacy  # 旧 vm-target-* / vm-es-stack も削除
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
