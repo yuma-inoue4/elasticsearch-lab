@@ -97,6 +97,7 @@ Multipass と Ansible の構成を一度横に置き、Docker Compose を用い�
 - ES 用スタック作業場所: `docker/el-stack/`
 - Multipass / Ansible 構成は **`vm/`** 配下に集約（横置き）
 - **手順書（解説多め）:** [`el-setup-manual.md`](./el-setup-manual.md)
+- **構成ポンチ絵（As-Is / To-Be）:** [`ponchi-e.md`](./ponchi-e.md) / [`ponchi-e-as-is.drawio`](./ponchi-e-as-is.drawio) / [`ponchi-e-to-be.drawio`](./ponchi-e-to-be.drawio)
 
 ## 6. 作業の進め方（前回の反省）
 

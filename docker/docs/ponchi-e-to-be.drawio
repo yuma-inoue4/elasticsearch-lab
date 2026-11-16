@@ -1,0 +1,106 @@
+<mxfile host="app.diagrams.net" modified="2026-11-16T05:51:00.000Z" agent="Composer" version="22.1.0" type="device">
+  <diagram id="to-be" name="To-Be">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="To-Be（ゴール）本番トレース寄りの試験環境&#xa;Security ON + Fleet / Agent + 運用検証（ILM・アラート・障害試験）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="900" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sources" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="200" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="sources-label" value="収集対象" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="110" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="app" value="アプリ / ログ源" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="70" y="160" width="140" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="agent" value="Elastic Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="70" y="260" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="stack" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="300" y="100" width="420" height="400" as="geometry" />
+        </mxCell>
+        <mxCell id="stack-label" value="試験環境 on Compose（Security ON）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="310" y="110" width="320" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fleet" value="Fleet Server&#xa;（受付・ポリシー）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="340" y="160" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="kibana" value="Kibana&#xa;+ Fleet UI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="530" y="160" width="150" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="es1" value="ES node1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="340" y="280" width="110" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="es2" value="ES node2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="470" y="280" width="110" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="es3" value="ES node3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="600" y="280" width="110" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sec-note" value="認証・TLS あり&#xa;（本番差分を縮小）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="340" y="360" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ops" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="100" width="220" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="ops-label" value="検証・提案したいこと" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="790" y="110" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ilm" value="ILM / コスト最適化" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="800" y="160" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="alert" value="アラート / SLI・SLO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="800" y="230" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="chaos" value="ノード障害・再配置" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="800" y="300" width="180" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="footer" value="※ Cloud の完全複製ではなく、経路と機能のトレースが目的&#xa;※ 実装順: As-Is 完了 → Security → Fleet/Agent → 検証テーマ" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="520" width="700" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="app" target="agent">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" value="enroll / 送信" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1" source="agent" target="fleet">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="fleet" target="es1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="fleet" target="es2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="fleet" target="es3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a6" value="管理・可視化" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=10;" edge="1" parent="1" source="kibana" target="es2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a7" value="Fleet 設定" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;fontSize=10;" edge="1" parent="1" source="kibana" target="fleet">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1" source="es2" target="ilm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1" source="es2" target="alert">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;" edge="1" parent="1" source="es3" target="chaos">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

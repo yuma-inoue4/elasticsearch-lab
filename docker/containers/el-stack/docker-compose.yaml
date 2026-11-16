@@ -1,1 +1,104 @@
 # 変数は同階層の .env を参照
+
+#-------------------------------------
+# services
+#-------------------------------------
+services:
+  # --- es01 ---
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    container_name: es01
+    environment:
+      # ノード名
+      - node.name=es01
+      # クラスタ名
+      - cluster.name=${CLUSTER_NAME}
+      # 起動時に声をかける相手一覧
+      - discovery.seed_hosts=es01,es02,es03
+      # 初回クラスタ作成時のマスター候補。ブートストラップ用
+      - cluster.initial_master_nodes=es01,es02,es03
+      # 可能ならメモリをロックしスワップを避ける（ulimits.memlock とセット）
+      - bootstrap.memory_lock=true
+      # 認証などのセキュリティ機能をオフ
+      - xpack.security.enabled=false
+      # クライアント向け HTTP（9200）を HTTPS にしない
+      - xpack.security.http.ssl.enabled=false
+      # ノード間通信を TLS にしない
+      - xpack.security.transport.ssl.enabled=false
+      # JVM ヒープなど（.env の -Xms1g -Xmx1g）
+      - ES_JAVA_OPTS=${ES_JAVA_OPTS}
+    ulimits:
+      memlock:
+       # メモリロックの上限(スワップを避けるため無制限: -1)
+        soft: -1
+        hard: -1
+    volumes:
+      - es01-data:/usr/share/elasticsearch/data
+    ports:
+      - ${ES_PORT}:9200
+    mem_limit: ${MEM_LIMIT}
+
+  # --- es02 --- 
+  es02: 
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.seed_hosts=es01,es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - ES_JAVA_OPTS=${ES_JAVA_OPTS}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es02-data:/usr/share/elasticsearch/data
+    mem_limit: ${MEM_LIMIT}
+
+  # --- es03 --- 
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    container_name: es03
+    environment:
+      - node.name=es03
+      - cluster.name=${CLUSTER_NAME}
+      - discovery.seed_hosts=es01,es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - ES_JAVA_OPTS=${ES_JAVA_OPTS}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es03-data:/usr/share/elasticsearch/data
+    mem_limit: ${MEM_LIMIT}
+
+  # --- kibana --- 
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    container_name: kibana
+    depends_on:
+      - es01
+    environment:
+      - ELASTICSEARCH_HOSTS=http://es01:9200
+    ports:
+      - ${KIBANA_PORT}:5601
+    mem_limit: ${KIBANA_MEM_LIMIT}
+
+#-------------------------------------
+# volumes
+#-------------------------------------
+volumes:
+  # /var/lib/docker/volumes/ 配下に作成される永続ボリューム。ホスト側に作成される
+  es01-data:
+  es02-data:
+  es03-data:
