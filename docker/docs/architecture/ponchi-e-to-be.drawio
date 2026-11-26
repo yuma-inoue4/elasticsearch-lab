@@ -1,106 +1,138 @@
-<mxfile host="app.diagrams.net" modified="2026-11-16T05:51:00.000Z" agent="Composer" version="22.1.0" type="device">
-  <diagram id="to-be" name="To-Be">
-    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
-      <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-
-        <mxCell id="title" value="To-Be（ゴール）本番トレース寄りの試験環境&#xa;Security ON + Fleet / Agent + 運用検証（ILM・アラート・障害試験）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=15;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="40" y="20" width="900" height="50" as="geometry" />
-        </mxCell>
-
-        <mxCell id="sources" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="40" y="100" width="200" height="280" as="geometry" />
-        </mxCell>
-        <mxCell id="sources-label" value="収集対象" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontStyle=1;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="50" y="110" width="120" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="app" value="アプリ / ログ源" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="70" y="160" width="140" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="agent" value="Elastic Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="70" y="260" width="140" height="60" as="geometry" />
-        </mxCell>
-
-        <mxCell id="stack" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="300" y="100" width="420" height="400" as="geometry" />
-        </mxCell>
-        <mxCell id="stack-label" value="試験環境 on Compose（Security ON）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontStyle=1;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="310" y="110" width="320" height="30" as="geometry" />
-        </mxCell>
-
-        <mxCell id="fleet" value="Fleet Server&#xa;（受付・ポリシー）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="340" y="160" width="160" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="kibana" value="Kibana&#xa;+ Fleet UI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="530" y="160" width="150" height="70" as="geometry" />
-        </mxCell>
-
-        <mxCell id="es1" value="ES node1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="340" y="280" width="110" height="55" as="geometry" />
-        </mxCell>
-        <mxCell id="es2" value="ES node2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="470" y="280" width="110" height="55" as="geometry" />
-        </mxCell>
-        <mxCell id="es3" value="ES node3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="600" y="280" width="110" height="55" as="geometry" />
-        </mxCell>
-
-        <mxCell id="sec-note" value="認証・TLS あり&#xa;（本番差分を縮小）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=11;fontColor=#333333;" vertex="1" parent="1">
-          <mxGeometry x="340" y="360" width="200" height="50" as="geometry" />
-        </mxCell>
-
-        <mxCell id="ops" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="780" y="100" width="220" height="280" as="geometry" />
-        </mxCell>
-        <mxCell id="ops-label" value="検証・提案したいこと" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontStyle=1;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="790" y="110" width="180" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="ilm" value="ILM / コスト最適化" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="800" y="160" width="180" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="alert" value="アラート / SLI・SLO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="800" y="230" width="180" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="chaos" value="ノード障害・再配置" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="800" y="300" width="180" height="50" as="geometry" />
-        </mxCell>
-
-        <mxCell id="footer" value="※ Cloud の完全複製ではなく、経路と機能のトレースが目的&#xa;※ 実装順: As-Is 完了 → Security → Fleet/Agent → 検証テーマ" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=11;fontColor=#333333;" vertex="1" parent="1">
-          <mxGeometry x="40" y="520" width="700" height="50" as="geometry" />
-        </mxCell>
-
-        <mxCell id="a1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="app" target="agent">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="a2" value="enroll / 送信" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="agent" target="fleet">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="a3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="fleet" target="es1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="a4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="fleet" target="es2">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="a5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="fleet" target="es3">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="a6" value="管理・可視化" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="kibana" target="es2">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="a7" value="Fleet 設定" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="kibana" target="fleet">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="a8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="es2" target="ilm">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="a9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="es2" target="alert">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="a10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="es3" target="chaos">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
+<mxfile host="65bd71144e">
+    <diagram id="to-be" name="To-Be">
+        <mxGraphModel dx="1082" dy="895" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1760" pageHeight="960" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="（ゴール）Fleet / Agent + 運用検証（ILM・アラート・障害試験）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=16;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="23" y="20" width="1100" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="host" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="80" width="1700" height="840" as="geometry"/>
+                </mxCell>
+                <mxCell id="host-label" value="ノートPC（WSL）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontStyle=1;fontSize=13;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="90" width="320" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="browser" value="ブラウザ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="270" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="app" value="アプリ / ログ源" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="600" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="compose" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="240" y="140" width="1160" height="740" as="geometry"/>
+                </mxCell>
+                <mxCell id="compose-label" value="docker compose（el-stack）" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontStyle=1;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="260" y="155" width="280" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="sec-note" value="認証・TLS あり" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="560" y="155" width="200" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="fleet" value="Fleet Server&#10;:8220" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="420" width="180" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="agent" value="Elastic Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="600" width="180" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="kibana" value="Kibana + Fleet UI&#10;:5601" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="540" y="260" width="150" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="es01" value="es01&#10;:9200（ホスト公開）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="940" y="260" width="180" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="es02" value="es02" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="940" y="450" width="180" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="es03" value="es03" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="940" y="630" width="180" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="v1" value="volume&#10;es01-data" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1240" y="260" width="110" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="v2" value="volume&#10;es02-data" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1240" y="450" width="110" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="v3" value="volume&#10;es03-data" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1240" y="630" width="110" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="note" value="※ クラスタ内部で es01–03 が相互接続&lt;br&gt;※ ログも画面も、HTTP の入口は es01" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=11;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="760" width="420" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="ops" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;dashed=1;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1430" y="160" width="260" height="430" as="geometry"/>
+                </mxCell>
+                <mxCell id="ops-label" value="検証テーマ" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontStyle=1;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1450" y="175" width="200" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="ilm" value="ILM / コスト最適化" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1450" y="230" width="220" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="alert" value="アラート / SLI・SLO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1450" y="320" width="220" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="chaos" value="ノード障害・再配置" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="1450" y="410" width="220" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ops-note" value="クラスタに対して試す。&#10;特定ノードへの接続ではない。" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=11;fontColor=#333333;" parent="1" vertex="1">
+                    <mxGeometry x="1450" y="490" width="220" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-browser" value="https://localhost:5601&#10;画面を見る" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="browser" target="kibana" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-kibana-es" value="https://es01:9200&#10;画面の裏で読み書き" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="kibana" target="es01" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-kibana-fleet" value="ポリシーの管理" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;dashed=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=0;exitY=1;entryX=1;entryY=0;" parent="1" source="kibana" target="fleet" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="540" y="380"/>
+                            <mxPoint x="460" y="380"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-app" value="ログを渡す&#10;同一マシンのファイル経由（ポートなし）" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="app" target="agent" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-40" y="52" as="offset"/>
+                        <Array as="points">
+                            <mxPoint x="180" y="635"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-enroll" value="このマシンをFleetの&#10;管理下に登録する" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" parent="1" source="agent" target="fleet" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-agent-es" value="ログの書き込み" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0;entryX=0.8;entryY=0;" parent="1" source="agent" target="es01" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="500" y="205"/>
+                            <mxPoint x="1084" y="205"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-fleet-es" value="状態の読み書き" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.2;" parent="1" source="fleet" target="es01" edge="1">
+                    <mxGeometry x="-0.6" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="720" y="455"/>
+                            <mxPoint x="720" y="276"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e-shard1" value="シャードの複製" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;startArrow=block;startFill=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="es01" target="es02" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-shard2" value="シャードの複製" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;startArrow=block;startFill=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="es02" target="es03" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-vol1" value="データの保存" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="es01" target="v1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-vol2" value="データの保存" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="es02" target="v2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-vol3" value="データの保存" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;dashed=1;fontSize=10;strokeColor=#333333;fontColor=#000000;labelBackgroundColor=#ffffff;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="es03" target="v3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
 </mxfile>

@@ -4,7 +4,9 @@
 # services
 #-------------------------------------
 services:
-  # --- es01 ---
+  #-------------------------------------
+  # es01
+  #-------------------------------------
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     container_name: es01
@@ -38,7 +40,9 @@ services:
       - ${ES_PORT}:9200
     mem_limit: ${MEM_LIMIT}
 
-  # --- es02 --- 
+  #-------------------------------------
+  # es02
+  #-------------------------------------
   es02: 
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     container_name: es02
@@ -60,7 +64,9 @@ services:
       - es02-data:/usr/share/elasticsearch/data
     mem_limit: ${MEM_LIMIT}
 
-  # --- es03 --- 
+  #-------------------------------------
+  # es03
+  #-------------------------------------
   es03:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     container_name: es03
@@ -82,7 +88,9 @@ services:
       - es03-data:/usr/share/elasticsearch/data
     mem_limit: ${MEM_LIMIT}
 
-  # --- kibana --- 
+  #-------------------------------------
+  # kibana
+  #-------------------------------------
   kibana:
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
     container_name: kibana
